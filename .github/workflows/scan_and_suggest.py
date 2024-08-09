@@ -2,7 +2,7 @@ import requests
 import os
 import subprocess
 
-def search_github_repos(query, sort='updated', order='desc', per_page=10):
+def search_github_repos(query, sort='updated', order='desc', per_page=20):
     url = f"https://api.github.com/search/repositories"
     headers = {'Accept': 'application/vnd.github.v3+json'}
     params = {
@@ -46,8 +46,17 @@ def count_vba_related_files(repo_path):
     # Print the counts
     for ext, count in counts.items():
         print(f"Number of '{ext}' files: {count}")
+    else:
+        print(f"No files with the specified extensions were found.")
     
     return counts
+
+def fix_vbnet_issue(repo):
+        # Clone the repo
+        clone_repo(repo['html_url'], 'repos')
+        repo_name = repo['html_url'].split('/')[-1]
+        repo_path = os.path.join('repos', repo_name)
+        count_vba_related_files(repo_path)
 
 def main():
     query = 'VBA'
@@ -64,13 +73,8 @@ def main():
                 print(f"Updated at: {repo['updated_at']}")
                 print('-' * 40)
                 
-                # Clone the repo
-                clone_repo(repo['html_url'], 'repos')
-
                 if repo['language'] == "Visual Basic .NET":
-                    repo_name = repo['html_url'].split('/')[-1]
-                    repo_path = os.path.join('repos', repo_name)
-                    count_vba_related_files(repo_path)
+                    fix_vbnet_issue(repo)
     else:
         print("No repositories found.")
 
