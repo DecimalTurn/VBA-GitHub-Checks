@@ -64,6 +64,11 @@ def create_github_issue(repo_full_name, title, body, token):
         'body': body
     }
     
+    print(f"URL: {url}")
+    print(f"Token: {'*' * len(token)}")  # Avoid printing the actual token
+    print(f"Headers: {headers}")
+    print(f"Data: {data}")
+
     response = requests.post(url, headers=headers, json=data)
     
     if response.status_code == 201:

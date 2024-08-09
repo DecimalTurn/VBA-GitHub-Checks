@@ -28,3 +28,5 @@ jobs:
     - name: Run script
       run: |
         python './.github/workflows/scan_and_suggest.py'
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
