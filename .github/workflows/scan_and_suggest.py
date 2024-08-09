@@ -27,6 +27,7 @@ def main():
         for repo in repos['items']:
             print(f"Name: {repo['name']}")
             print(f"Description: {repo['description']}")
+            print(f"Language: {repo['language']}")
             print(f"URL: {repo['html_url']}")
             print(f"Updated at: {repo['updated_at']}")
             print('-' * 40)
