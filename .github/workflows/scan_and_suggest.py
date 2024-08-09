@@ -97,8 +97,8 @@ def fix_vbnet_issue(repo):
             # Create an issue in the active repository
             repo_full_name = os.getenv('GITHUB_REPOSITORY')  # e.g., 'owner/repo'
             token = os.getenv('GITHUB_TOKEN')  # GitHub token
-            issue_title = f"{repo['name']} detected as Visual Basic .NET"
-            issue_body = "Test"
+            issue_title = f"[{repo['name']}] detected as Visual Basic .NET"
+            issue_body = "Hello @DecimalTurn," + chr(34) + chr(34) + "There seems to be a small issue with your repo."
             create_github_issue(repo_full_name, issue_title, issue_body, token)
 
 def main():
