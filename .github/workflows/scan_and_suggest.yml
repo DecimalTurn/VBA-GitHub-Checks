@@ -10,6 +10,7 @@ on:
 
 permissions:
   contents: write
+  issues: write  # Ensure the token has permission to create issues
 
 jobs:
   scan-and-suggest:
