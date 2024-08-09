@@ -1,4 +1,5 @@
 import requests
+import os
 
 def search_github_repos(query, sort='updated', order='desc', per_page=10):
     url = f"https://api.github.com/search/repositories"
