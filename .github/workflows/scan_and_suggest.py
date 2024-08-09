@@ -53,12 +53,48 @@ def count_vba_related_files(repo_path):
     
     return counts
 
+def create_github_issue(repo_full_name, title, body, token):
+    url = f"https://api.github.com/repos/{repo_full_name}/issues"
+    headers = {
+        'Accept': 'application/vnd.github.v3+json',
+        'Authorization': f'token {token}'
+    }
+    data = {
+        'title': title,
+        'body': body
+    }
+    
+    response = requests.post(url, headers=headers, json=data)
+    
+    if response.status_code == 201:
+        print(f"Issue created successfully: {response.json()['html_url']}")
+    else:
+        print(f"Failed to create issue. Status code: {response.status_code}")
+        print(response.json())
+
 def fix_vbnet_issue(repo):
         # Clone the repo
         clone_repo(repo['html_url'], 'repos')
         repo_name = repo['html_url'].split('/')[-1]
         repo_path = os.path.join('repos', repo_name)
-        count_vba_related_files(repo_path)
+        counts = count_vba_related_files(repo_path)
+
+        if counts[".vb"] > 0 and counts[".bas"] == 0:
+            # Prepare the issue information
+            issue_info = f"Issue 1: {repo['owner']['login']} - {repo['html_url']}\n"
+
+            # Append to the text file
+            with open('./repos/actions.txt', 'a') as file:
+                file.write(issue_info)
+            
+            print(f"Appended issue information to actions.txt for {repo['html_url']}")
+
+            # Create an issue in the active repository
+            repo_full_name = os.getenv('GITHUB_REPOSITORY')  # e.g., 'owner/repo'
+            token = os.getenv('GITHUB_TOKEN')  # GitHub token
+            issue_title = f"{repo['name']} detected as Visual Basic .NET"
+            issue_body = "Test"
+            create_github_issue(repo_full_name, issue_title, issue_body, token)
 
 def main():
     query = 'VBA'
