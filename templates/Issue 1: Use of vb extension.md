@@ -3,7 +3,7 @@ Hello %{user}%,
 It seems like there is a small issue with your repo named [%{reponame}%](%{url}%).
 Currently, it is marked as a Visual Basic .NET repo since more than 50% of its code is identified as VB.NET.
 
-![image](..blob/main/assets/VBA.png)
+![image](https://imgur.com/a/ySiCojk)
 
 The reason is that you are currently using the extension `.vb` for your VBA code, but this extension is associated with VB.NET.
 
