@@ -1,0 +1,14 @@
+<svg width="662" height="174" xmlns="http://www.w3.org/2000/svg"
+    xmlns:xlink="http://www.w3.org/1999/xlink" overflow="hidden">
+    <g>
+        
+        <rect x="0" y="0" width="662" height="174" stroke="#042433" stroke-width="2"
+            stroke-miterlimit="8" fill="#0D1117" />
+        <path
+            d="M79 86C79 76.6112 86.6112 69 96 69 105.389 69 113 76.6112 113 86 113 95.3888 105.389 103 96 103 86.6112 103 79 95.3888 79 86Z"
+            fill="#945DB7" fill-rule="evenodd" />
+        <text fill="#E6EDF3"
+            font-family="Segoe UI Semibold,Segoe UI Semibold_MSFontService,sans-serif"
+            font-weight="600" font-size="49" transform="translate(153.819 104)">Visual Basic .NET</text>
+    </g>
+</svg>
