@@ -78,7 +78,7 @@ def create_github_issue(repo_full_name, title, body, token):
 def read_template_file(template_path, replacements):
     with open(template_path, 'r') as file:
         template_content = file.read()
-    
+    print("Replace merge fields")
     # Replace merge fields in the template
     for key, value in replacements.items():
         template_content = template_content.replace(f"%{{{key}}}%", value)
@@ -100,7 +100,7 @@ def fix_vbnet_issue(repo):
             url = repo['html_url']
             
             # Read and process the template file
-            template_path = os.path.join('templates', repo_name) + 'Issue 1: Use of vb extension.md'
+            template_path = './templates/' + 'Issue 1: Use of vb extension.md'
             print(template_path)
             replacements = {
                 'user': user,
