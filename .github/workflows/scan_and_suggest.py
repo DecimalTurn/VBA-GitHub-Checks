@@ -77,6 +77,16 @@ def create_github_issue(repo_full_name, title, body, token):
         print(f"Failed to create issue. Status code: {response.status_code}")
         print(response.json())
 
+def read_template_file(template_path, replacements):
+    with open(template_path, 'r') as file:
+        template_content = file.read()
+    
+    # Replace merge fields in the template
+    for key, value in replacements.items():
+        template_content = template_content.replace(f"%{{{key}}}%", value)
+    
+    return template_content
+
 def fix_vbnet_issue(repo):
         # Clone the repo
         clone_repo(repo['html_url'], 'repos')
@@ -85,8 +95,20 @@ def fix_vbnet_issue(repo):
         counts = count_vba_related_files(repo_path)
 
         if counts[".vb"] > 0 and counts[".bas"] == 0:
-            # Prepare the issue information
-            issue_info = f"Issue 1: {repo['owner']['login']} - {repo['html_url']}\n"
+            # Prepare issue details
+            repo_full_name = os.getenv('GITHUB_REPOSITORY')  # e.g., 'owner/repo'
+            user = repo['owner']['login']
+            reponame = repo['name']
+            url = repo['html_url']
+            
+            # Read and process the template file
+            template_path = './templates/Issue 1: Use of vb extension.md'
+            replacements = {
+                'user': user,
+                'reponame': reponame,
+                'url': url
+            }
+            issue_body = read_template_file(template_path, replacements)
 
             # Append to the text file
             with open('./repos/actions.txt', 'a') as file:
@@ -95,10 +117,8 @@ def fix_vbnet_issue(repo):
             print(f"Appended issue information to actions.txt for {repo['html_url']}")
 
             # Create an issue in the active repository
-            repo_full_name = os.getenv('GITHUB_REPOSITORY')  # e.g., 'owner/repo'
             token = os.getenv('GITHUB_TOKEN')  # GitHub token
             issue_title = f"[{repo['name']}] detected as Visual Basic .NET"
-            issue_body = "Hello @DecimalTurn," + chr(34) + chr(34) + "There seems to be a small issue with your repo."
             create_github_issue(repo_full_name, issue_title, issue_body, token)
 
 def main():
