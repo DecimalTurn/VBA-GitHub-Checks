@@ -11,7 +11,7 @@ To solve this issue and make sure that files in this repo are correctly identifi
 
 ### A. Change the file extensions to `.vba`
 
-By using `.vba` you make sure that all you VBA code will be correctly detected by GitHub as VBA.
+By using the `.vba` extension, you make sure that all you VBA code will be correctly detected by GitHub as VBA.
 
 The only downside of this is that you won't be able to use the simple Export feature of the VBE, but you were already likely not using it anyway.
 
