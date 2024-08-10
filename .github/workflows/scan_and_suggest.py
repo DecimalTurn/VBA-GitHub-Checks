@@ -48,8 +48,6 @@ def count_vba_related_files(repo_path):
     # Print the counts
     for ext, count in counts.items():
         print(f"Number of '{ext}' files: {count}")
-    else:
-        print(f"No files with the specified extensions were found.")
     
     return counts
 
@@ -102,23 +100,18 @@ def fix_vbnet_issue(repo):
             url = repo['html_url']
             
             # Read and process the template file
-            template_path = './templates/Issue 1: Use of vb extension.md'
+            template_path = os.path.join('templates', repo_name) + 'Issue 1: Use of vb extension.md'
+            print(template_path)
             replacements = {
                 'user': user,
                 'reponame': reponame,
                 'url': url
             }
-            issue_body = read_template_file(template_path, replacements)
-
-            # Append to the text file
-            with open('./repos/actions.txt', 'a') as file:
-                file.write(issue_info)
-            
-            print(f"Appended issue information to actions.txt for {repo['html_url']}")
 
             # Create an issue in the active repository
             token = os.getenv('GITHUB_TOKEN')  # GitHub token
             issue_title = f"[{repo['name']}] detected as Visual Basic .NET"
+            issue_body = read_template_file(template_path, replacements)
             create_github_issue(repo_full_name, issue_title, issue_body, token)
 
 def main():
