@@ -9,18 +9,33 @@ def get_all_issues(repo_full_name, token):
         'Accept': 'application/vnd.github.v3+json',
         'Authorization': f'token {token}'
     }
+    
     params = {
-        'per_page': 100
+        'per_page': 100,  # Maximum number of issues per page
+        'state': 'all',   # Fetch all issues, open and closed
+        'page': 1         # Start with the first page
     }
     
-    response = requests.get(url, headers=headers, params=params)
+    all_issues = []
     
-    if response.status_code == 200:
-        issues = response.json()
-        return [issue['title'] for issue in issues]
-    else:
-        print(f"Failed to fetch issues. Status code: {response.status_code}")
-        return []
+    while True:
+        response = requests.get(url, headers=headers, params=params)
+        
+        if response.status_code == 200:
+            issues = response.json()
+            all_issues.extend([issue['title'] for issue in issues])
+            
+            if len(issues) < 100:
+                # If fewer than 100 issues were returned, this is the last page
+                break
+            else:
+                # Move to the next page
+                params['page'] += 1
+        else:
+            print(f"Failed to fetch issues. Status code: {response.status_code}")
+            break
+    
+    return all_issues
 
 def already_issue_for_user(issue_title, all_issues):
     # Extract the user from the issue_title (everything before the first '/')
