@@ -85,7 +85,7 @@ def clone_repo(repo_url, destination_folder):
         print(f"Repository {repo_name} already exists in {destination_folder}.")
 
 def count_vba_related_files(repo_path):
-    vba_extensions = ['.bas', '.cls', '.frm', '.vb', '.d.vb']
+    vba_extensions = ['.bas', '.cls', '.frm', '.vb', '.d.vb', '.vbproj']
     counts = {ext: 0 for ext in vba_extensions}
     
     for root, dirs, files in os.walk(repo_path):
@@ -141,7 +141,7 @@ def fix_vbnet_issue(repo):
     repo_path = os.path.join('repos', repo_name)
     counts = count_vba_related_files(repo_path)
 
-    if counts[".vb"] > 0 and counts[".d.vb"] == 0 and counts[".bas"] == 0:
+    if counts[".vb"] > 0 and counts[".vbproj"] == 0 and counts[".d.vb"] == 0 and counts[".bas"] == 0:
         # Prepare issue details
         repo_full_name = os.getenv('GITHUB_REPOSITORY')  # e.g., 'owner/repo'
         user = repo['owner']['login']
