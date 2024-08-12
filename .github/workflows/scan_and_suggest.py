@@ -3,6 +3,40 @@ import os
 import subprocess
 import time
 
+def get_all_issues(repo_full_name, token):
+    url = f"https://api.github.com/repos/{repo_full_name}/issues"
+    headers = {
+        'Accept': 'application/vnd.github.v3+json',
+        'Authorization': f'token {token}'
+    }
+    params = {
+        'per_page': 100
+    }
+    
+    response = requests.get(url, headers=headers, params=params)
+    
+    if response.status_code == 200:
+        issues = response.json()
+        return [issue['title'] for issue in issues]
+    else:
+        print(f"Failed to fetch issues. Status code: {response.status_code}")
+        return []
+
+def already_issue_for_user(issue_title, all_issues):
+    # Extract the user from the issue_title (everything before the first '/')
+    user_from_title = issue_title.split('/')[0]
+    
+    # Iterate through all issues and check if the user matches
+    for existing_issue in all_issues:
+        # Extract the user from the existing issue title
+        user_from_existing = existing_issue.split('/')[0]
+        # If they match, return True
+        if user_from_title == user_from_existing:
+            return True
+    return False
+
+
+
 def search_github_repos(query, sort='updated', order='desc', per_page=10, page=1):
     url = f"https://api.github.com/search/repositories"
     headers = {'Accept': 'application/vnd.github.v3+json'}
@@ -86,31 +120,37 @@ def read_template_file(template_path, replacements):
     return template_content
 
 def fix_vbnet_issue(repo):
-        # Clone the repo
-        clone_repo(repo['html_url'], 'repos')
-        repo_name = repo['html_url'].split('/')[-1]
-        repo_path = os.path.join('repos', repo_name)
-        counts = count_vba_related_files(repo_path)
+    # Clone the repo
+    clone_repo(repo['html_url'], 'repos')
+    repo_name = repo['html_url'].split('/')[-1]
+    repo_path = os.path.join('repos', repo_name)
+    counts = count_vba_related_files(repo_path)
 
-        if counts[".vb"] > 0 and counts[".d.vb"] == 0 and counts[".bas"] == 0:
-            # Prepare issue details
-            repo_full_name = os.getenv('GITHUB_REPOSITORY')  # e.g., 'owner/repo'
-            user = repo['owner']['login']
-            reponame = repo['name']
-            url = repo['html_url']
-            
+    if counts[".vb"] > 0 and counts[".d.vb"] == 0 and counts[".bas"] == 0:
+        # Prepare issue details
+        repo_full_name = os.getenv('GITHUB_REPOSITORY')  # e.g., 'owner/repo'
+        user = repo['owner']['login']
+        reponame = repo['name']
+        url = repo['html_url']
+        
+        # Get open issues
+        token = os.getenv('GITHUB_TOKEN')  # GitHub token
+        all_issues = get_all_issues(repo_full_name, token)
+
+        issue_title = f"[{user}/{reponame}] detected as Visual Basic .NET"
+        
+        # Check if an issue already exists
+        if already_issue_for_user(issue_title, all_issues):
+            print(f"Issue already exists for user: {user}")
+        else:
             # Read and process the template file
             template_path = './templates/' + 'Issue 1: Use of vb extension.md'
-            print(template_path)
             replacements = {
                 'user': user,
                 'reponame': reponame,
                 'url': url
             }
 
-            # Create an issue in the active repository
-            token = os.getenv('GITHUB_TOKEN')  # GitHub token
-            issue_title = f"[{repo['owner']['login']}/{repo['name']}] detected as Visual Basic .NET"
             issue_body = read_template_file(template_path, replacements)
             create_github_issue(repo_full_name, issue_title, issue_body, token)
 
