@@ -173,7 +173,7 @@ def fix_vbnet_issue(repo):
 def main():
     query = 'VBA'
     query = 'VBA in:name,description'
-    per_page = 20  # Number of repos to fetch per page
+    per_page = 50  # Number of repos to fetch per page
     total_pages = 5  # Number of pages to check (you can adjust this value)
 
     for page in range(1, total_pages + 1):
