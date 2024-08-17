@@ -152,14 +152,14 @@ def fix_vbnet_issue(repo):
         token = os.getenv('GITHUB_TOKEN')  # GitHub token
         all_issues = get_all_issues(repo_full_name, token)
 
-        issue_title = f"[{user}/{reponame}] detected as Visual Basic .NET"
+        issue_title = f"[{user}/{reponame}] detected as Visual Basic .NET [Issue A]"
         
         # Check if an issue already exists
         if already_issue_for_user(issue_title, all_issues):
             print(f"Issue already exists for user: {user}")
         else:
             # Read and process the template file
-            template_path = './templates/' + 'Issue 1: Use of vb extension.md'
+            template_path = './templates/' + 'Issue A: Use of vb extension.md'
             replacements = {
                 'user': user,
                 'reponame': reponame,
