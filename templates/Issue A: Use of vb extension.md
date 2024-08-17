@@ -1,4 +1,4 @@
-Hi %{user}%,
+Hi @%{user}%,
 
 It seems like there is a small issue with your repo named [%{reponame}%](%{url}%).
 Currently, it is marked as a Visual Basic .NET repo since more than 50% of its code is identified as VB.NET.
