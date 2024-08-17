@@ -15,7 +15,5 @@
         <path
             d="M420 79 526.7 79.0001 526.7 87.0001 420 87ZM522.7 71.0001 546.7 83.0001 522.7 95.0001Z"
             fill="#F2F2F2" />
-        <path d="M256 111 304 111" stroke="#FF0000" stroke-width="2" stroke-miterlimit="8"
-            fill="none" fill-rule="evenodd" />
     </g>
 </svg>
