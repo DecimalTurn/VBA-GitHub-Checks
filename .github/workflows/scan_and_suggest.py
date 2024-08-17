@@ -100,7 +100,7 @@ def count_vba_related_files(repo_path):
     
     return counts
 
-def create_github_issue(repo_full_name, title, body, token):
+def create_github_issue(repo_full_name, title, body, token, labels=None):
     url = f"https://api.github.com/repos/{repo_full_name}/issues"
     headers = {
         'Accept': 'application/vnd.github.v3+json',
@@ -108,7 +108,8 @@ def create_github_issue(repo_full_name, title, body, token):
     }
     data = {
         'title': title,
-        'body': body
+        'body': body,
+        'labels': labels if labels else []  # Use the provided labels or an empty list if none are given
     }
     
     print(f"URL: {url}")
@@ -167,7 +168,7 @@ def fix_vbnet_issue(repo):
             }
 
             issue_body = read_template_file(template_path, replacements)
-            create_github_issue(repo_full_name, issue_title, issue_body, token)
+            create_github_issue(repo_full_name, issue_title, issue_body, token, ["external"])
 
 def main():
     query = 'VBA'
