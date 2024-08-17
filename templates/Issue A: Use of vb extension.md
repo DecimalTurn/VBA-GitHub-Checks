@@ -7,9 +7,11 @@ Currently, it is marked as a Visual Basic .NET repo since more than 50% of its c
 
 The reason is that you are currently using the extension `.vb` for your VBA code, but this extension is associated with VB.NET.
 
-To solve this issue and make sure that files in this repo are correctly identified as VBA, there are a mainly 3 options:
+To solve this issue and make sure that files in this repo are correctly identified as VBA, there are a mainly **3 options**:
 
 ## A. Change the file extensions to `.vba`
+
+<img height="100px" src="https://raw.githubusercontent.com/DecimalTurn/VBA-on-GitHub-Automations/main/assets/vba-file-extension.svg">
 
 By using the `.vba` extension, you make sure that all you VBA code will be correctly detected by GitHub as VBA.
 
