@@ -3,7 +3,7 @@ Hi %{user}%,
 It seems like there is a small issue with your repo named [%{reponame}%](%{url}%).
 Currently, it is marked as a Visual Basic .NET repo since more than 50% of its code is identified as VB.NET.
 
-<img height="100px" src="/assets/vb-file-extension.svg">
+<img height="100px" src="https://raw.githubusercontent.com/DecimalTurn/VBA-on-GitHub-Automations/main/assets/vb-file-extension.svg">
 
 The reason is that you are currently using the extension `.vb` for your VBA code, but this extension is associated with VB.NET.
 
