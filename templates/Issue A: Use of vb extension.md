@@ -9,14 +9,14 @@ The reason is that you are currently using the extension `.vb` for your VBA code
 
 To solve this issue and make sure that files in this repo are correctly identified as VBA, there are a mainly **3 options**:
 
-## A. Change the file extensions to `.vba`
+## Option A: Change the file extensions to `.vba`
 
 <img height="100px" src="https://raw.githubusercontent.com/DecimalTurn/VBA-on-GitHub-Automations/main/assets/vba-file-extension.svg">
 
 By using the `.vba` extension, you make sure that all you VBA code will be correctly detected by GitHub as VBA.
 
 
-## B. Add the following in the `.gitattributes` file:
+## Option B: Add the following in the `.gitattributes` file:
 
 ```gitattributes
 
@@ -27,7 +27,7 @@ By using the `.vba` extension, you make sure that all you VBA code will be corre
 The advantage of this method is that you only have to make the change in one place. The disadvantage is that this won't solve the problem for GitHub searches because the `linguist-language` attribute is not supported for searches. This means that if the VBA language filter is used in a search query, files that are currently labeled as VB.NET still won't show up.
 
 
-## C. Change the file extensions to `.bas` + add the language information at the top of each file
+## Option C: Change the file extensions to `.bas` + add the language information at the top of each file
 
 The `.bas` extension is the default extension for VBA modules code, but it is also shared by other languages in the BASIC family of languages. To avoid any ambiguity, it is better to include the following information at the top of your `.bas` files:
 
