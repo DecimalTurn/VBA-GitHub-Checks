@@ -140,7 +140,7 @@ def fix_vbnet_issue(repo):
     # Clone the repo
     clone_repo(repo['html_url'], 'repos')
     #todo: DRY repo_name calc
-    repo_name = repo['html_url'].split('/')[-2] + "---" + repo['html_url'].split('/')[-1]
+    repo_name = repo['html_url'].split('/')[-2] + " --- " + repo['html_url'].split('/')[-1]
     repo_path = os.path.join('repos', repo_name)
     counts = count_vba_related_files(repo_path)
 
