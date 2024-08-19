@@ -75,7 +75,7 @@ def clone_repo(repo_url, destination_folder):
     if not os.path.exists(destination_folder):
         os.makedirs(destination_folder)
     
-    repo_name = repo_url.split('/')[-1]
+    repo_name =  repo_url.split('/')[-2] + " --- " + repo_url.split('/')[-1]
     repo_path = os.path.join(destination_folder, repo_name)
     
     if not os.path.exists(repo_path):
@@ -83,6 +83,7 @@ def clone_repo(repo_url, destination_folder):
         subprocess.run(["git", "clone", repo_url, repo_path])
     else:
         print(f"Repository {repo_name} already exists in {destination_folder}.")
+        raise ValueError("Problem with cloning.")
 
 def count_vba_related_files(repo_path):
     vba_extensions = ['.bas', '.cls', '.frm', '.vb', '.d.vb', '.vbproj']
@@ -138,7 +139,8 @@ def read_template_file(template_path, replacements):
 def fix_vbnet_issue(repo):
     # Clone the repo
     clone_repo(repo['html_url'], 'repos')
-    repo_name = repo['html_url'].split('/')[-1]
+    #todo: DRY repo_name calc
+    repo_name = repo['html_url'].split('/')[-2] + "---" + repo['html_url'].split('/')[-1]
     repo_path = os.path.join('repos', repo_name)
     counts = count_vba_related_files(repo_path)
 
