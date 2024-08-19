@@ -189,10 +189,12 @@ def main():
                     print(f"Language: {repo['language']}")
                     print(f"URL: {repo['html_url']}")
                     print(f"Updated at: {repo['updated_at']}")
-                    print('-' * 40)
                     
                     if repo['language'] == "Visual Basic .NET":
+                        print("")
                         fix_vbnet_issue(repo)
+                        
+                    print('-' * 40)
         else:
             print("No repositories found.")
 
