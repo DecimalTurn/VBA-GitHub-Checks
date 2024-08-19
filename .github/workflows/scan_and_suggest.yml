@@ -2,7 +2,9 @@
 
 name: VBA-Scan-And-Suggest
 
-on: workflow_dispatch
+on:
+  schedule:
+    - cron:  '0 16 * * *'
 
 permissions:
   contents: write
