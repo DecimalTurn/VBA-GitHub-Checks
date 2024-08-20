@@ -15,4 +15,4 @@ This repo uses automated scripts via GitHub Actions to check for newly updated V
 
 ## Checks
 
-The only current check in place is the check for VB.NET vs VBA (Issue A). If things go well, more checks will be added in the future.
+The only current check in place is the check for VB.NET vs VBA (Check A). If things go well, more checks will be added in the future.
