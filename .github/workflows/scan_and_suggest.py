@@ -86,7 +86,7 @@ def clone_repo(repo_url, destination_folder):
         raise ValueError("Problem with cloning.")
 
 def count_vba_related_files(repo_path):
-    vba_extensions = ['.bas', '.cls', '.frm', '.vb', '.d.vb', '.vbproj']
+    vba_extensions = ['.bas', '.cls', '.frm', '.vba', '.vbs', '.vb', '.d.vb', '.vbproj']
     counts = {ext: 0 for ext in vba_extensions}
     
     for root, dirs, files in os.walk(repo_path):
