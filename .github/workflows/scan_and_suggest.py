@@ -155,7 +155,7 @@ def fix_vbnet_issue(repo):
         token = os.getenv('GITHUB_TOKEN')  # GitHub token
         all_issues = get_all_issues(repo_full_name, token)
 
-        issue_title = f"[{user}/{reponame}] detected as Visual Basic .NET [Issue A]"
+        issue_title = f"[{user}/{reponame}] detected as Visual Basic .NET"
         
         # Check if an issue already exists
         if already_issue_for_user(issue_title, all_issues):
@@ -170,7 +170,7 @@ def fix_vbnet_issue(repo):
             }
 
             issue_body = read_template_file(template_path, replacements)
-            create_github_issue(repo_full_name, issue_title, issue_body, token, ["external"])
+            create_github_issue(repo_full_name, issue_title, issue_body, token, ["external", "Check A"])
 
 def main():
     query = 'VBA'
