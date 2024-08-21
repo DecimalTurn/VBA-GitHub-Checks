@@ -3,7 +3,11 @@ import os
 import subprocess
 import time
 
-def get_all_issues(repo_full_name, token):
+all_issues = None
+token = ""
+
+def get_all_issues(token, repo_full_name):
+    global all_issues
     url = f"https://api.github.com/repos/{repo_full_name}/issues"
     headers = {
         'Accept': 'application/vnd.github.v3+json',
@@ -37,7 +41,22 @@ def get_all_issues(repo_full_name, token):
     
     return all_issues
 
-def already_issue_for_user(issue_title, all_issues):
+def get_issue(token, repo_full_name, issue_number):
+    url = f"https://api.github.com/repos/{repo_full_name}/issues/{issue_number}"
+    headers = {
+        'Accept': 'application/vnd.github.v3+json',
+        'Authorization': f'token {token}'
+    }
+    
+    response = requests.get(url, headers=headers)
+    
+    if response.status_code == 200:
+        return response.json()
+    else:
+        print(f"Failed to fetch issue {issue_number}. Status code: {response.status_code}")
+
+
+def already_issue_for_user(issue_title):
     # Extract the user from the issue_title (everything before the first '/')
     user_from_title = issue_title.split('/')[0]
     
@@ -49,7 +68,6 @@ def already_issue_for_user(issue_title, all_issues):
         if user_from_title == user_from_existing:
             return True
     return False
-
 
 
 def search_github_repos(query, sort='updated', order='desc', per_page=10, page=1):
@@ -72,6 +90,11 @@ def search_github_repos(query, sort='updated', order='desc', per_page=10, page=1
         return None
 
 def clone_repo(repo_url, destination_folder):
+
+    if repo_url == "":
+        print("Repo URL was empty")
+        return
+
     if not os.path.exists(destination_folder):
         os.makedirs(destination_folder)
     
@@ -101,7 +124,7 @@ def count_vba_related_files(repo_path):
     
     return counts
 
-def create_github_issue(repo_full_name, title, body, token, labels=None):
+def create_github_issue(token, repo_full_name, title, body, labels=None):
     url = f"https://api.github.com/repos/{repo_full_name}/issues"
     headers = {
         'Accept': 'application/vnd.github.v3+json',
@@ -122,6 +145,7 @@ def create_github_issue(repo_full_name, title, body, token, labels=None):
     
     if response.status_code == 201:
         print(f"Issue created successfully: {response.json()['html_url']}")
+        return response.json()['number']
     else:
         print(f"Failed to create issue. Status code: {response.status_code}")
         print(response.json())
@@ -137,6 +161,18 @@ def read_template_file(template_path, replacements):
     return template_content
 
 def fix_vbnet_issue(repo):
+
+    global all_issues
+
+    user = repo['owner']['login']
+    reponame = repo['name']
+    issue_title = f"[{user}/{reponame}] detected as Visual Basic .NET"
+
+    # Check if an issue already exists
+    if already_issue_for_user(issue_title, all_issues):
+        print(f"Issue already exists for user: {user}")
+        return
+
     # Clone the repo
     clone_repo(repo['html_url'], 'repos')
     #todo: DRY repo_name calc
@@ -144,35 +180,30 @@ def fix_vbnet_issue(repo):
     repo_path = os.path.join('repos', repo_name)
     counts = count_vba_related_files(repo_path)
 
-    if counts[".vb"] > 0 and counts[".vbproj"] == 0 and counts[".d.vb"] == 0 and counts[".bas"] == 0:
-        # Prepare issue details
-        repo_full_name = os.getenv('GITHUB_REPOSITORY')  # e.g., 'owner/repo'
-        user = repo['owner']['login']
-        reponame = repo['name']
-        url = repo['html_url']
-        
-        # Get open issues
-        token = os.getenv('GITHUB_TOKEN')  # GitHub token
-        all_issues = get_all_issues(repo_full_name, token)
+    if counts[".vb"] > 0 and counts[".vbproj"] == 0 and counts[".d.vb"] == 0 and counts[".bas"] == 0:       
+        # Read and process the template file
+        template_path = './templates/' + 'Issue A: Use of vb extension.md'
+        replacements = {
+            'user': user,
+            'reponame': reponame,
+            'url': repo['html_url']
+        }
 
-        issue_title = f"[{user}/{reponame}] detected as Visual Basic .NET"
-        
-        # Check if an issue already exists
-        if already_issue_for_user(issue_title, all_issues):
-            print(f"Issue already exists for user: {user}")
-        else:
-            # Read and process the template file
-            template_path = './templates/' + 'Issue A: Use of vb extension.md'
-            replacements = {
-                'user': user,
-                'reponame': reponame,
-                'url': url
-            }
-
-            issue_body = read_template_file(template_path, replacements)
-            create_github_issue(repo_full_name, issue_title, issue_body, token, ["external", "Check A"])
+        issue_body = read_template_file(template_path, replacements)
+        issue_number = create_github_issue(token, repo_full_name, issue_title, issue_body, ["external", "Check A"])
+        if issue_number != 0:
+            new_issue = get_issue(token, os.getenv('GITHUB_REPOSITORY'), issue_number)
+            # We append the newly created issue to make sure that people don't receive more than one notification even if they have multiple repos that triggers a check.
+            all_issues.append(new_issue)
 
 def main():
+
+    global all_issues
+    global token
+    token = os.getenv('GITHUB_TOKEN')  # GitHub token
+    repo_full_name = os.getenv('GITHUB_REPOSITORY')  # e.g., 'owner/repo'
+    all_issues = get_all_issues(token, repo_full_name)
+
     query = 'VBA'
     query = 'VBA in:name,description'
     per_page = 50  # Number of repos to fetch per page
@@ -182,8 +213,11 @@ def main():
         print(f"Fetching page {page}...")
         repos = search_github_repos(query, per_page=per_page, page=page)
     
+        if page == 1:
+            print(f"Found {repos['total_count']} repositories")
+        print('-' * 40)
+
         if repos:
-            print(f"Found {repos['total_count']} repositories:")
             for repo in repos['items']:
                 if repo['language'] != 'VBA':
                     print(f"Name: {repo['name']}")
