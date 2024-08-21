@@ -7,7 +7,7 @@ Hopefully, this README will answer questions you may have regarding what is goin
 
 ## Motivation
 
-One of the issues with VBA is that there is no commonly accepted method of extracting your VBA project for [version control](https://en.wikipedia.org/wiki/Version_control). This can lead to different approaches that are incompatible with the way Git and GitHub workcausing mislabeled repositories, missing syntax highlighting and other problems. That's where this project comes in: to help fix some of these issues for VBA repositories by suggesting potential fixes.
+One of the issues with VBA is that there is no commonly accepted method of extracting your VBA project for [version control](https://en.wikipedia.org/wiki/Version_control). This can lead to different approaches that are incompatible with the way Git and GitHub work and cause mislabeled repositories, missing syntax highlighting and other problems. That's where this project comes in: to help fix some of these issues for VBA repositories by suggesting potential fixes.
 
 ## How
 
