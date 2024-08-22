@@ -160,41 +160,67 @@ def read_template_file(template_path, replacements):
     
     return template_content
 
-def fix_vbnet_issue(repo):
+import os
 
+def fix_vbnet_issue(repo):
     global all_issues
 
-    user = repo['owner']['login']
-    reponame = repo['name']
-    issue_title = f"[{user}/{reponame}] detected as Visual Basic .NET"
+    try:
+        user = repo['owner']['login']
+        reponame = repo['name']
+        issue_title = f"[{user}/{reponame}] detected as Visual Basic .NET"
 
-    # Check if an issue already exists
-    if already_issue_for_user(issue_title, all_issues):
-        print(f"Issue already exists for user: {user}")
-        return
+        # Check if an issue already exists
+        if already_issue_for_user(issue_title, all_issues):
+            print(f"Issue already exists for user: {user}")
+            return
 
-    # Clone the repo
-    clone_repo(repo['html_url'], 'repos')
-    #todo: DRY repo_name calc
-    repo_name = repo['html_url'].split('/')[-2] + " --- " + repo['html_url'].split('/')[-1]
-    repo_path = os.path.join('repos', repo_name)
-    counts = count_vba_related_files(repo_path)
+        # Clone the repo
+        try:
+            clone_repo(repo['html_url'], 'repos')
+        except Exception as e:
+            print(f"Error cloning the repo: {e}")
+            return
 
-    if counts[".vb"] > 0 and counts[".vbproj"] == 0 and counts[".d.vb"] == 0 and counts[".bas"] == 0:       
-        # Read and process the template file
-        template_path = './templates/' + 'Issue A: Use of vb extension.md'
-        replacements = {
-            'user': user,
-            'reponame': reponame,
-            'url': repo['html_url']
-        }
+        #todo: DRY repo_name calc
+        repo_name = repo['html_url'].split('/')[-2] + " --- " + repo['html_url'].split('/')[-1]
+        repo_path = os.path.join('repos', repo_name)
 
-        issue_body = read_template_file(template_path, replacements)
-        issue_number = create_github_issue(token, repo_full_name, issue_title, issue_body, ["external", "Check A"])
-        if issue_number != 0:
-            new_issue = get_issue(token, os.getenv('GITHUB_REPOSITORY'), issue_number)
-            # We append the newly created issue to make sure that people don't receive more than one notification even if they have multiple repos that triggers a check.
-            all_issues.append(new_issue)
+        try:
+            counts = count_vba_related_files(repo_path)
+        except Exception as e:
+            print(f"Error counting VBA-related files: {e}")
+            return
+
+        if counts[".vb"] > 0 and counts[".vbproj"] == 0 and counts[".d.vb"] == 0 and counts[".bas"] == 0:       
+            # Read and process the template file
+            template_path = './templates/' + 'Issue A: Use of vb extension.md'
+            replacements = {
+                'user': user,
+                'reponame': reponame,
+                'url': repo['html_url']
+            }
+
+            try:
+                issue_body = read_template_file(template_path, replacements)
+            except Exception as e:
+                print(f"Error reading the template file: {e}")
+                return
+
+            try:
+                issue_number = create_github_issue(token, repo_full_name, issue_title, issue_body, ["external", "Check A"])
+            except Exception as e:
+                print(f"Error creating GitHub issue: {e}")
+                return
+
+            if issue_number != 0:
+                try:
+                    new_issue = get_issue(token, os.getenv('GITHUB_REPOSITORY'), issue_number)
+                    all_issues.append(new_issue)
+                except Exception as e:
+                    print(f"Error retrieving or appending the issue: {e}")
+    except Exception as e:
+        print(f"An unexpected error occurred: {e}")
 
 def main():
 
