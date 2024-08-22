@@ -104,6 +104,7 @@ def clone_repo(repo_url, destination_folder):
     if not os.path.exists(repo_path):
         print(f"Cloning {repo_url} into {repo_path}")
         subprocess.run(["git", "clone", repo_url, repo_path])
+        return repo_name
     else:
         print(f"Repository {repo_name} already exists in {destination_folder}.")
         raise ValueError("Problem with cloning.")
@@ -164,24 +165,13 @@ def fix_vbnet_issue(repo):
     global all_issues
 
     try:
-        user = repo['owner']['login']
-        reponame = repo['name']
-        issue_title = f"[{user}/{reponame}] detected as Visual Basic .NET"
-
-        # Check if an issue already exists
-        if already_issue_for_user(issue_title):
-            print(f"🟡 Issue already exists for user: {user}")
-            return
-
         # Clone the repo
         try:
-            clone_repo(repo['html_url'], 'repos')
+            repo_name = clone_repo(repo['html_url'], 'repos')
         except Exception as e:
             print(f"Error cloning the repo: {e}")
             return
 
-        #todo: DRY repo_name calc
-        repo_name = repo['html_url'].split('/')[-2] + " --- " + repo['html_url'].split('/')[-1]
         repo_path = os.path.join('repos', repo_name)
 
         try:
@@ -194,8 +184,8 @@ def fix_vbnet_issue(repo):
             # Read and process the template file
             template_path = './templates/' + 'Issue A: Use of vb extension.md'
             replacements = {
-                'user': user,
-                'reponame': reponame,
+                'user': repo['owner']['login'],
+                'reponame': repo['name'],
                 'url': repo['html_url']
             }
 
@@ -243,16 +233,29 @@ def main():
 
         if repos:
             for repo in repos['items']:
-                if repo['language'] != 'VBA':
-                    print(f"Name: {repo['name']}")
-                    print(f"Description: {repo['description']}")
-                    print(f"Language: {repo['language']}")
-                    print(f"URL: {repo['html_url']}")
-                    print(f"Updated at: {repo['updated_at']}")
-                    
-                    if repo['language'] == "Visual Basic .NET":
-                        print("")
-                        fix_vbnet_issue(repo)
+
+                if repo['language'] == 'VBA':
+                    continue
+
+                print(f"Name: {repo['name']}")
+                print(f"Description: {repo['description']}")
+                print(f"Language: {repo['language']}")
+                print(f"URL: {repo['html_url']}")
+                print(f"Updated at: {repo['updated_at']}")
+                
+                if repo['language'] == "Visual Basic .NET":
+                    print("")
+
+                    user = repo['owner']['login']
+                    reponame = repo['name']
+                    issue_title = f"[{user}/{reponame}] detected as Visual Basic .NET"
+
+                    # Check if an issue already exists
+                    if already_issue_for_user(issue_title):
+                        print(f"🟡 Issue already exists for user: {user}")
+                        continue
+
+                    fix_vbnet_issue(repo)
                         
                     print('-' * 40)
         else:
