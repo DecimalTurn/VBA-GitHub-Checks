@@ -169,7 +169,7 @@ def fix_vbnet_issue(repo):
         issue_title = f"[{user}/{reponame}] detected as Visual Basic .NET"
 
         # Check if an issue already exists
-        if already_issue_for_user(issue_title, all_issues):
+        if already_issue_for_user(issue_title):
             print(f"Issue already exists for user: {user}")
             return
 
