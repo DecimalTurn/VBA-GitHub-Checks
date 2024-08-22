@@ -92,7 +92,7 @@ def search_github_repos(query, sort='updated', order='desc', per_page=10, page=1
 def clone_repo(repo_url, destination_folder):
 
     if repo_url == "":
-        print("Repo URL was empty")
+        print("🔴 Repo URL was empty")
         return
 
     if not os.path.exists(destination_folder):
@@ -144,10 +144,10 @@ def create_github_issue(token, repo_full_name, title, body, labels=None):
     response = requests.post(url, headers=headers, json=data)
     
     if response.status_code == 201:
-        print(f"Issue created successfully: {response.json()['html_url']}")
+        print(f"🟢 Issue created successfully: {response.json()['html_url']}")
         return response.json()['number']
     else:
-        print(f"Failed to create issue. Status code: {response.status_code}")
+        print(f"🔴 Failed to create issue. Status code: {response.status_code}")
         print(response.json())
 
 def read_template_file(template_path, replacements):
@@ -170,7 +170,7 @@ def fix_vbnet_issue(repo):
 
         # Check if an issue already exists
         if already_issue_for_user(issue_title):
-            print(f"Issue already exists for user: {user}")
+            print(f"🟡 Issue already exists for user: {user}")
             return
 
         # Clone the repo
@@ -187,7 +187,7 @@ def fix_vbnet_issue(repo):
         try:
             counts = count_vba_related_files(repo_path)
         except Exception as e:
-            print(f"Error counting VBA-related files: {e}")
+            print(f"🔴 Error counting VBA-related files: {e}")
             return
 
         if counts[".vb"] > 0 and counts[".vbproj"] == 0 and counts[".d.vb"] == 0 and counts[".bas"] == 0:       
@@ -202,13 +202,13 @@ def fix_vbnet_issue(repo):
             try:
                 issue_body = read_template_file(template_path, replacements)
             except Exception as e:
-                print(f"Error reading the template file: {e}")
+                print(f"🔴 Error reading the template file: {e}")
                 return
 
             try:
                 issue_number = create_github_issue(token, repo_full_name, issue_title, issue_body, ["external", "Check A"])
             except Exception as e:
-                print(f"Error creating GitHub issue: {e}")
+                print(f"🔴 Error creating GitHub issue: {e}")
                 return
 
             if issue_number != 0:
@@ -216,9 +216,9 @@ def fix_vbnet_issue(repo):
                     new_issue = get_issue(token, os.getenv('GITHUB_REPOSITORY'), issue_number)
                     all_issues.append(new_issue)
                 except Exception as e:
-                    print(f"Error retrieving or appending the issue: {e}")
+                    print(f"🔴 Error retrieving or appending the issue: {e}")
     except Exception as e:
-        print(f"An unexpected error occurred: {e}")
+        print(f"🔴 An unexpected error occurred: {e}")
 
 def main():
 
