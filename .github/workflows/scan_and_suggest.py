@@ -160,8 +160,6 @@ def read_template_file(template_path, replacements):
     
     return template_content
 
-import os
-
 def fix_vbnet_issue(repo):
     global all_issues
 
