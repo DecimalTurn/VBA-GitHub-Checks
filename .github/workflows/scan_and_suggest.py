@@ -255,7 +255,8 @@ def main():
                     if already_issue_for_user(user):
                         print(f"🟡 Issue already exists for user: {user}")
                         continue
-
+                        
+                    print(f"Performing checks")
                     fix_vbnet_issue(repo)
                         
                     print('-' * 40)
