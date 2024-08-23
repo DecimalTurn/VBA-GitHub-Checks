@@ -2,7 +2,7 @@
 
 Hi!👋
 
-I you are reading this it's probably that you got a notification from GitHub Action Bot telling you that there was an issue with you VBA repo.
+If you are reading this, it's probably that you got a notification from GitHub Action Bot telling you that there was an issue with you VBA repo.
 Hopefully, this README will answer questions you may have regarding what is going on here.
 
 ## Motivation
