@@ -59,8 +59,12 @@ def get_issue(token, repo_slug , issue_number):
 def already_issue_for_user(user):   
     # Iterate through all issues and check if the user matches
     for existing_issue in all_issues:
+        issue_title = existing_issue['title']
+        if issue_title == "":
+            print(f"🔴 Problem with issue: {existing_issue}")
+            raise ValueError("Problem while fetching issue title.")
         # Extract the user from the existing issue title
-        user_in_issue = existing_issue.split('/')[0].replace("[", "")
+        user_in_issue = issue_title.split('/')[0].replace("[", "")
         if user == user_in_issue:
             return True
     return False
