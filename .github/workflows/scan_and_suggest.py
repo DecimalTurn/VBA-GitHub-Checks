@@ -6,9 +6,9 @@ import time
 all_issues = None
 token = ""
 
-def get_all_issues(token, repo_full_name):
+def get_all_issues(token, repo_slug):
     global all_issues
-    url = f"https://api.github.com/repos/{repo_full_name}/issues"
+    url = f"https://api.github.com/repos/{repo_slug}/issues"
     headers = {
         'Accept': 'application/vnd.github.v3+json',
         'Authorization': f'token {token}'
@@ -36,13 +36,13 @@ def get_all_issues(token, repo_full_name):
                 # Move to the next page
                 params['page'] += 1
         else:
-            print(f"Failed to fetch issues. Status code: {response.status_code}")
-            break
+            print(f"🔴 Failed to fetch issues. Status code: {response.status_code}")
+            raise ValueError("Problem while fetching issues.")
     
     return all_issues
 
-def get_issue(token, repo_full_name, issue_number):
-    url = f"https://api.github.com/repos/{repo_full_name}/issues/{issue_number}"
+def get_issue(token, repo_slug , issue_number):
+    url = f"https://api.github.com/repos/{repo_slug}/issues/{issue_number}"
     headers = {
         'Accept': 'application/vnd.github.v3+json',
         'Authorization': f'token {token}'
@@ -56,16 +56,12 @@ def get_issue(token, repo_full_name, issue_number):
         print(f"Failed to fetch issue {issue_number}. Status code: {response.status_code}")
 
 
-def already_issue_for_user(issue_title):
-    # Extract the user from the issue_title (everything before the first '/')
-    user_from_title = issue_title.split('/')[0]
-    
+def already_issue_for_user(user):   
     # Iterate through all issues and check if the user matches
     for existing_issue in all_issues:
         # Extract the user from the existing issue title
-        user_from_existing = existing_issue.split('/')[0]
-        # If they match, return True
-        if user_from_title == user_from_existing:
+        user_in_issue = existing_issue.split('/')[0].replace("[", "")
+        if user == user_in_issue:
             return True
     return False
 
@@ -125,8 +121,8 @@ def count_vba_related_files(repo_path):
     
     return counts
 
-def create_github_issue(token, repo_full_name, title, body, labels=None):
-    url = f"https://api.github.com/repos/{repo_full_name}/issues"
+def create_github_issue(token, this_repo_slug, title, body, labels=None):
+    url = f"https://api.github.com/repos/{this_repo_slug}/issues"
     headers = {
         'Accept': 'application/vnd.github.v3+json',
         'Authorization': f'token {token}'
@@ -189,6 +185,9 @@ def fix_vbnet_issue(repo):
                 'url': repo['html_url']
             }
 
+            slug = get_slug(repo)
+            issue_title = f"[{slug}] detected as Visual Basic .NET"
+            
             try:
                 issue_body = read_template_file(template_path, replacements)
             except Exception as e:
@@ -196,7 +195,7 @@ def fix_vbnet_issue(repo):
                 return
 
             try:
-                issue_number = create_github_issue(token, repo_full_name, issue_title, issue_body, ["external", "Check A"])
+                issue_number = create_github_issue(token, os.getenv('GITHUB_REPOSITORY'), issue_title, issue_body, ["external", "Check A"])
             except Exception as e:
                 print(f"🔴 Error creating GitHub issue: {e}")
                 return
@@ -210,13 +209,15 @@ def fix_vbnet_issue(repo):
     except Exception as e:
         print(f"🔴 An unexpected error occurred: {e}")
 
+def get_slug(repo):
+    return repo['owner']['login'] + "/" + repo['name']
+
 def main():
 
     global all_issues
     global token
-    token = os.getenv('GITHUB_TOKEN')  # GitHub token
-    repo_full_name = os.getenv('GITHUB_REPOSITORY')  # e.g., 'owner/repo'
-    all_issues = get_all_issues(token, repo_full_name)
+    token = os.getenv('GITHUB_TOKEN')
+    all_issues = get_all_issues(token, os.getenv('GITHUB_REPOSITORY'))
 
     query = 'VBA'
     query = 'VBA in:name,description'
@@ -247,11 +248,7 @@ def main():
                     print("")
 
                     user = repo['owner']['login']
-                    reponame = repo['name']
-                    issue_title = f"[{user}/{reponame}] detected as Visual Basic .NET"
-
-                    # Check if an issue already exists
-                    if already_issue_for_user(issue_title):
+                    if already_issue_for_user(user):
                         print(f"🟡 Issue already exists for user: {user}")
                         continue
 
