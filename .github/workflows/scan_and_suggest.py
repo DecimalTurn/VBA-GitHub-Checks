@@ -157,7 +157,7 @@ def read_template_file(template_path, replacements):
     
     return template_content
 
-def fix_vbnet_issue(repo):
+def fix_file_extensions_issue(repo):
     global all_issues
 
     try:
@@ -176,38 +176,47 @@ def fix_vbnet_issue(repo):
             print(f"🔴 Error counting VBA-related files: {e}")
             return
 
-        if counts[".vb"] > 0 and counts[".vbproj"] == 0 and counts[".d.vb"] == 0 and counts[".bas"] == 0:       
-            # Read and process the template file
-            template_path = './templates/' + 'Issue A: Use of vb extension.md'
-            replacements = {
-                'user': repo['owner']['login'],
-                'reponame': repo['name'],
-                'url': repo['html_url']
-            }
+        if repo["Language"] == "Visual Basic .NET" and counts[".vb"] > 0 and counts[".vbproj"] == 0 and counts[".d.vb"] == 0 and counts[".bas"] == 0:       
+            # VB.NET extension used for VBA code
+            create_issue_wrapper(repo, 'detected as Visual Basic .NET', 'Check A: Use of vb extension.md')
+        
+        if repo["Language"] == "VBScript" and counts[".vbs"] > 0 and counts[".vba"] == 0 and counts[".bas"] == 0:
+            # VBScript extension used for VBA code
+            create_issue_wrapper(repo, 'detected as VBScript', 'Check B: Use of vbs extension.md')
 
-            slug = get_slug(repo)
-            issue_title = f"[{slug}] detected as Visual Basic .NET"
-            
-            try:
-                issue_body = read_template_file(template_path, replacements)
-            except Exception as e:
-                print(f"🔴 Error reading the template file: {e}")
-                return
-
-            try:
-                issue_number = create_github_issue(token, os.getenv('GITHUB_REPOSITORY'), issue_title, issue_body, ["external", "Check A"])
-            except Exception as e:
-                print(f"🔴 Error creating GitHub issue: {e}")
-                return
-
-            if issue_number != 0:
-                try:
-                    new_issue = get_issue(token, os.getenv('GITHUB_REPOSITORY'), issue_number)
-                    all_issues.append(new_issue['title'])
-                except Exception as e:
-                    print(f"🔴 Error retrieving or appending the issue: {e}")
     except Exception as e:
         print(f"🔴 An unexpected error occurred: {e}")
+
+def create_issue_wrapper(repo, issue_title_suffix, template_name):
+        # Read and process the template file
+        template_path = './templates/' + template_name
+        replacements = {
+            'user': repo['owner']['login'],
+            'reponame': repo['name'],
+            'url': repo['html_url']
+        }
+
+        slug = get_slug(repo)
+        issue_title = f"[{slug}] {issue_title_suffix}"
+        
+        try:
+            issue_body = read_template_file(template_path, replacements)
+        except Exception as e:
+            print(f"🔴 Error reading the template file: {e}")
+            return
+
+        try:
+            issue_number = create_github_issue(token, os.getenv('GITHUB_REPOSITORY'), issue_title, issue_body, ["external", "Check A"])
+        except Exception as e:
+            print(f"🔴 Error creating GitHub issue: {e}")
+            return
+
+        if issue_number != 0:
+            try:
+                new_issue = get_issue(token, os.getenv('GITHUB_REPOSITORY'), issue_number)
+                all_issues.append(new_issue['title'])
+            except Exception as e:
+                print(f"🔴 Error retrieving or appending the issue: {e}")
 
 def get_slug(repo):
     return repo['owner']['login'] + "/" + repo['name']
@@ -244,7 +253,7 @@ def main():
                 print(f"URL: {repo['html_url']}")
                 print(f"Updated at: {repo['updated_at']}")
                 
-                if repo['language'] == "Visual Basic .NET":
+                if repo['language'] == "Visual Basic .NET" or repo['language'] == "VBScript":
                     print("")
 
                     user = repo['owner']['login']
@@ -253,7 +262,7 @@ def main():
                         continue
                         
                     print(f"Performing checks")
-                    fix_vbnet_issue(repo)
+                    fix_file_extensions_issue(repo)
                         
                     print('-' * 40)
         else:
