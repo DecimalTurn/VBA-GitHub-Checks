@@ -1,7 +1,7 @@
 Hi @%{user}%,
 
 It seems like there is a small issue with your repo named [%{reponame}%](%{url}%).
-Currently, it is marked as a Visual Basic .NET repo since more than 50% of its code is identified as [VBScript](https://en.wikipedia.org/wiki/VBScript).
+Currently, it is marked as a VBScript repo since more than 50% of its code is identified as [VBScript](https://en.wikipedia.org/wiki/VBScript).
 
 <img src="https://raw.githubusercontent.com/DecimalTurn/VBA-on-GitHub-Automations/main/assets/vbs-file-extension.svg">
 
