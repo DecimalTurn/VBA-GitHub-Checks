@@ -178,16 +178,16 @@ def fix_file_extensions_issue(repo):
 
         if repo['language'] == "Visual Basic .NET" and counts[".vb"] > 0 and counts[".vbproj"] == 0 and counts[".d.vb"] == 0 and counts[".bas"] == 0:       
             # VB.NET extension used for VBA code
-            create_issue_wrapper(repo, 'detected as Visual Basic .NET', 'Check A: Use of vb extension.md')
+            create_issue_wrapper(repo, 'detected as Visual Basic .NET', 'Check A: Use of vb extension.md', 'Check A')
         
         if repo['language'] == "VBScript" and counts[".vbs"] > 0 and counts[".vba"] == 0 and counts[".bas"] == 0:
             # VBScript extension used for VBA code
-            create_issue_wrapper(repo, 'detected as VBScript', 'Check B: Use of vbs extension.md')
+            create_issue_wrapper(repo, 'detected as VBScript', 'Check B: Use of vbs extension.md', 'Check B')
 
     except Exception as e:
         print(f"🔴 An unexpected error occurred: {e}")
 
-def create_issue_wrapper(repo, issue_title_suffix, template_name):
+def create_issue_wrapper(repo, issue_title_suffix, template_name, label_name):
         # Read and process the template file
         template_path = './templates/' + template_name
         replacements = {
@@ -206,7 +206,7 @@ def create_issue_wrapper(repo, issue_title_suffix, template_name):
             return
 
         try:
-            issue_number = create_github_issue(token, os.getenv('GITHUB_REPOSITORY'), issue_title, issue_body, ["external", "Check A"])
+            issue_number = create_github_issue(token, os.getenv('GITHUB_REPOSITORY'), issue_title, issue_body, ["external", label_name])
         except Exception as e:
             print(f"🔴 Error creating GitHub issue: {e}")
             return
