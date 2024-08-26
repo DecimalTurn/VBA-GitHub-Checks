@@ -14,7 +14,7 @@ permissions:
 
 jobs:
   apply-filter:
-    name: Apply profanity filter
+    name: Apply comment filter
     runs-on: ubuntu-latest
 
     steps:
