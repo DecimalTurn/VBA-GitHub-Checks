@@ -176,14 +176,18 @@ def fix_file_extensions_issue(repo):
             print(f"🔴 Error counting VBA-related files: {e}")
             return
 
-        if counts[".vb"] > 0 and counts[".vbproj"] == 0 and counts[".d.vb"] == 0 and counts[".bas"] == 0:       
+        if repo["Language"] == "Visual Basic .NET" and counts[".vb"] > 0 and counts[".vbproj"] == 0 and counts[".d.vb"] == 0 and counts[".bas"] == 0:       
             # VB.NET extension used for VBA code
-            create_issue_for_user(repo, 'detected as Visual Basic .NET', 'Issue A: Use of vb extension.md')
+            create_issue_wrapper(repo, 'detected as Visual Basic .NET', 'Check A: Use of vb extension.md')
+        
+        if repo["Language"] == "VBScript" and counts[".vbs"] > 0 and counts[".vba"] == 0 and counts[".bas"] == 0:
+            # VBScript extension used for VBA code
+            create_issue_wrapper(repo, 'detected as VBScript', 'Check B: Use of vbs extension.md')
 
     except Exception as e:
         print(f"🔴 An unexpected error occurred: {e}")
 
-def create_issue_for_user(repo, issue_title_suffix, template_name):
+def create_issue_wrapper(repo, issue_title_suffix, template_name):
         # Read and process the template file
         template_path = './templates/' + template_name
         replacements = {
@@ -249,7 +253,7 @@ def main():
                 print(f"URL: {repo['html_url']}")
                 print(f"Updated at: {repo['updated_at']}")
                 
-                if repo['language'] == "Visual Basic .NET":
+                if repo['language'] == "Visual Basic .NET" or repo['language'] == "VBScript":
                     print("")
 
                     user = repo['owner']['login']
