@@ -6,7 +6,7 @@ on:
 
 permissions:
   contents: read
-  Issue: write
+  issues: write
 
 jobs:
   link-check:
@@ -45,6 +45,24 @@ jobs:
               #   issue_number: context.payload.issue.number,
               #   body: `A MediaFire link was found and removed from your comment to comply with our repository guidelines.`
               # });
+            }
+
+            // Regular expression to detect example links
+            const exampleLinkPattern = /https?:\/\/(www\.)?example\.com\/[^\s]+/g
+
+            // Check if the comment contains a example link
+            if (exampleLinkPattern.test(comment.body)) {
+              // Remove the example link from the comment
+              const updatedBody = comment.body.replace(exampleLinkPattern, '[Link removed for safety reasons]')
+
+              // Edit the comment with the example link removed
+              await github.rest.issues.updateComment({
+                owner: owner,
+                repo: repo,
+                comment_id: comment.id,
+                body: updatedBody
+              });
+
             }
 
 
