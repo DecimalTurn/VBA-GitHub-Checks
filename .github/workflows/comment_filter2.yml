@@ -1,0 +1,50 @@
+name: Check for Spammy Issue Comments
+
+on:
+  issue_comment:
+    types: [created, edited]
+
+permissions:
+  contents: read
+  Issue: write
+
+jobs:
+  link-check:
+    name: Remove suspicious links from issue comments
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@e69ef5462fd455e02edcaf4dd7708eda96b9eda0
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+
+            const comment = context.payload.comment
+            const owner = 'DecimalTurn'
+            const repo = 'VBA-on-GitHub-Automations'
+
+            // Regular expression to detect MediaFire links
+            const mediafireLinkPattern = /https?:\/\/(www\.)?mediafire\.com\/[^\s]+/g
+
+            // Check if the comment contains a MediaFire link
+            if (mediafireLinkPattern.test(comment.body)) {
+              // Remove the MediaFire link from the comment
+              const updatedBody = comment.body.replace(mediafireLinkPattern, '[Link removed for safety reasons]')
+
+              // Edit the comment with the MediaFire link removed
+              await github.rest.issues.updateComment({
+                owner: owner,
+                repo: repo,
+                comment_id: comment.id,
+                body: updatedBody
+              });
+
+              # // Optionally, you can add a follow-up comment notifying the user that the link was removed
+              # await github.rest.issues.createComment({
+              #   owner: owner,
+              #   repo: repo,
+              #   issue_number: context.payload.issue.number,
+              #   body: `A MediaFire link was found and removed from your comment to comply with our repository guidelines.`
+              # });
+            }
+
+
