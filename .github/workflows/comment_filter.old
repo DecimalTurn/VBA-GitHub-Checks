@@ -1,6 +1,6 @@
 name: Comments filter
 
-on:
+# on:
 #  issue_comment:
 #    types: [created, edited]
 #  issues:
