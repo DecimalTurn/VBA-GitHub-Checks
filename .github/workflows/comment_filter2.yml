@@ -22,13 +22,18 @@ jobs:
             const owner = 'DecimalTurn'
             const repo = 'VBA-on-GitHub-Automations'
 
+            console.log('Comment body:', comment.body)
+
             // Regular expression to detect MediaFire links
             const mediafireLinkPattern = /https?:\/\/(www\.)?mediafire\.com\/[^\s]+/g
 
             // Check if the comment contains a MediaFire link
             if (mediafireLinkPattern.test(comment.body)) {
+              console.log('MediaFire link found, removing it...')
+              
               // Remove the MediaFire link from the comment
               const updatedBody = comment.body.replace(mediafireLinkPattern, '[Link removed for safety reasons]')
+              console.log('Updated comment body:', updatedBody)
 
               // Edit the comment with the MediaFire link removed
               await github.rest.issues.updateComment({
@@ -37,14 +42,8 @@ jobs:
                 comment_id: comment.id,
                 body: updatedBody
               });
-
-              // Optionally, you can add a follow-up comment notifying the user that the link was removed
-              await github.rest.issues.createComment({
-                owner: owner,
-                repo: repo,
-                issue_number: context.payload.issue.number,
-                body: `A MediaFire link was found and removed from your comment to comply with our repository guidelines.`
-              });
+            } else {
+              console.log('No MediaFire link found.')
             }
 
             // Regular expression to detect example links
@@ -52,8 +51,11 @@ jobs:
 
             // Check if the comment contains an example link
             if (exampleLinkPattern.test(comment.body)) {
+              console.log('Example link found, removing it...')
+
               // Remove the example link from the comment
               const updatedBody = comment.body.replace(exampleLinkPattern, '[Link removed for safety reasons]')
+              console.log('Updated comment body:', updatedBody)
 
               // Edit the comment with the example link removed
               await github.rest.issues.updateComment({
@@ -62,4 +64,6 @@ jobs:
                 comment_id: comment.id,
                 body: updatedBody
               });
+            } else {
+              console.log('No example link found.')
             }
