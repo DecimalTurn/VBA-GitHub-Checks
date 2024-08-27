@@ -12,11 +12,10 @@ jobs:
     name: Remove suspicious links from issue comments
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/github-script@e69ef5462fd455e02edcaf4dd7708eda96b9eda0
+      - uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-
             const comment = context.payload.comment
             const { owner, repo } = context.repo
 
@@ -26,11 +25,22 @@ jobs:
 
             // Array of regex patterns and their replacements
             const regexReplacements = [
+              // File sharing websites (general)
               {
-                pattern: /https?:\/\/(www\.)?(example123456|mediafire|dropbox)\.com\/[^\s]+/g,
+                pattern: /https?:\/\/(www\.)?(box|dropbox|mediafire|sugarsync|tresorit|hightail|opentext|sharefile|citrixsharefile|icloud|onedrive|1drv)\.com\/[^\s]+/g,
                 replacement: '[Link removed for safety reasons]'
-              }
-              // Add more regex-replacement pairs as needed
+              },
+              // Google Drive (needs to match subdomain)
+              {
+                pattern: /https?:\/\/drive\.google\.com\/[^\s]+/g,
+                replacement: '[Link removed for safety reasons]'
+              },
+              // Link shorteners
+              {
+                pattern: /https?:\/\/(www\.)?(bit\.ly|t\.co|tinyurl\.com|goo\.gl|ow\.ly|buff\.ly|is\.gd|soo\.gd|t2mio|bl\.ink|clck\.ru|shorte\.st|cutt\.ly|v\.gd|qr\.ae|rb\.gy|rebrand\.ly|tr\.im|shorturl\.at|lnkd\.in)\/[^\s]+/g
+                replacement: '[Shorten link removed for safety reasons]'
+              },
+              // Add more as needed
             ];
 
             // Iterate through each regex and replace matches in the comment body
