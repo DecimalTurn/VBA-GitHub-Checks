@@ -19,9 +19,10 @@ jobs:
           script: |
 
             const comment = context.payload.comment
-            const owner = 'DecimalTurn'
-            const repo = 'VBA-on-GitHub-Automations'
+            const { owner, repo } = context.repo
 
+            console.log('Repository owner:', owner)
+            console.log('Repository name:', repo)
             console.log('Comment body:', comment.body)
 
             // Regular expression to detect MediaFire links
