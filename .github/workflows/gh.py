@@ -1,7 +1,7 @@
 # Github API utilities
 import requests
 
-def get_all_issues(token, repo_slug):
+def get_all_issues_title(token, repo_slug):
     global all_issues
     url = f"https://api.github.com/repos/{repo_slug}/issues"
     headers = {
@@ -15,14 +15,14 @@ def get_all_issues(token, repo_slug):
         'page': 1         # Start with the first page
     }
     
-    all_issues = []
+    all_issues_title = []
     
     while True:
         response = requests.get(url, headers=headers, params=params)
         
         if response.status_code == 200:
             issues = response.json()
-            all_issues.extend([issue['title'] for issue in issues])
+            all_issues_title.extend([issue['title'] for issue in issues])
             
             if len(issues) < 100:
                 # If fewer than 100 issues were returned, this is the last page
@@ -34,7 +34,7 @@ def get_all_issues(token, repo_slug):
             print(f"🔴 Failed to fetch issues. Status code: {response.status_code}")
             raise ValueError("Problem while fetching issues.")
     
-    return all_issues
+    return all_issues_title
 
 def get_issue(token, repo_slug , issue_number):
     url = f"https://api.github.com/repos/{repo_slug}/issues/{issue_number}"

@@ -2,15 +2,14 @@ import requests
 import os
 import subprocess
 import time
-import sys
-sys.path.insert(0, './.github/workflows/utils')
+# Custom modules
 import gh
 
-all_issues = None
+all_issues_title = None
 
 def already_issue_for_user(user):   
     # Iterate through all issues and check if the user matches
-    for existing_issue in all_issues:
+    for existing_issue in all_issues_title:
         # Extract the user from the existing issue title
         user_in_issue = existing_issue.split('/')[0].replace("[", "")
         if user == user_in_issue:
@@ -129,16 +128,16 @@ def fix_file_extensions_issue(token, repo):
 
         if repo['language'] == "Visual Basic .NET" and counts[".vb"] > 0 and counts[".vbproj"] == 0 and counts[".d.vb"] == 0 and counts[".bas"] == 0:       
             # VB.NET extension used for VBA code
-            create_issue_wrapper(repo, 'detected as Visual Basic .NET', 'Check A: Use of vb extension.md', 'Check A')
+            create_issue_wrapper(token, repo, 'detected as Visual Basic .NET', 'Check A: Use of vb extension.md', 'Check A')
         
         if repo['language'] == "VBScript" and counts[".vbs"] > 0 and counts[".vba"] == 0 and counts[".bas"] == 0:
             # VBScript extension used for VBA code
-            create_issue_wrapper(repo, 'detected as VBScript', 'Check B: Use of vbs extension.md', 'Check B')
+            create_issue_wrapper(token, repo, 'detected as VBScript', 'Check B: Use of vbs extension.md', 'Check B')
 
     except Exception as e:
         print(f"🔴 An unexpected error occurred: {e}")
 
-def create_issue_wrapper(repo, issue_title_suffix, template_name, label_name):
+def create_issue_wrapper(token, repo, issue_title_suffix, template_name, label_name):
         # Read and process the template file
         template_path = './templates/' + template_name
         replacements = {
@@ -164,8 +163,8 @@ def create_issue_wrapper(repo, issue_title_suffix, template_name, label_name):
 
         if issue_number != 0:
             try:
-                new_issue = get_issue(token, os.getenv('GITHUB_REPOSITORY'), issue_number)
-                all_issues.append(new_issue['title'])
+                new_issue = gh.get_issue(token, os.getenv('GITHUB_REPOSITORY'), issue_number)
+                all_issues_title.append(new_issue['title'])
             except Exception as e:
                 print(f"🔴 Error retrieving or appending the issue: {e}")
 
@@ -176,7 +175,7 @@ def main():
 
     global all_issues
     token = os.getenv('GITHUB_TOKEN')
-    all_issues = get_all_issues(token, os.getenv('GITHUB_REPOSITORY'))
+    all_issues_title = gh.get_all_issues_title(token, os.getenv('GITHUB_REPOSITORY'))
 
     query = 'VBA'
     query = 'VBA in:name,description'
