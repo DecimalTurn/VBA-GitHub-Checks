@@ -1,5 +1,3 @@
-# VBA-on-GitHub-Automations
-
 Hi!👋
 
 If you are reading this, it's probably that you got a notification from GitHub Action Bot telling you that there was an issue with you VBA repo.
