@@ -4,7 +4,6 @@ import subprocess
 import time
 
 all_issues = None
-token = ""
 
 def get_all_issues(token, repo_slug):
     global all_issues
@@ -134,7 +133,6 @@ def create_github_issue(token, this_repo_slug, title, body, labels=None):
     }
     
     print(f"URL: {url}")
-    print(f"Token: {'*' * len(token)}")  # Avoid printing the actual token
     print(f"Headers: {headers}")
     print(f"Data: {data}")
 
@@ -157,7 +155,7 @@ def read_template_file(template_path, replacements):
     
     return template_content
 
-def fix_file_extensions_issue(repo):
+def fix_file_extensions_issue(token, repo):
     global all_issues
 
     try:
@@ -224,7 +222,6 @@ def get_slug(repo):
 def main():
 
     global all_issues
-    global token
     token = os.getenv('GITHUB_TOKEN')
     all_issues = get_all_issues(token, os.getenv('GITHUB_REPOSITORY'))
 
@@ -262,7 +259,7 @@ def main():
                         continue
                         
                     print(f"Performing checks")
-                    fix_file_extensions_issue(repo)
+                    fix_file_extensions_issue(token, repo)
                         
                     print('-' * 40)
         else:
