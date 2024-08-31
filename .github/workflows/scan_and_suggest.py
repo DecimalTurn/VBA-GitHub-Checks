@@ -2,63 +2,14 @@ import requests
 import os
 import subprocess
 import time
+# Custom modules
+import gh
 
-all_issues = None
-token = ""
-
-def get_all_issues(token, repo_slug):
-    global all_issues
-    url = f"https://api.github.com/repos/{repo_slug}/issues"
-    headers = {
-        'Accept': 'application/vnd.github.v3+json',
-        'Authorization': f'token {token}'
-    }
-    
-    params = {
-        'per_page': 100,  # Maximum number of issues per page
-        'state': 'all',   # Fetch all issues, open and closed
-        'page': 1         # Start with the first page
-    }
-    
-    all_issues = []
-    
-    while True:
-        response = requests.get(url, headers=headers, params=params)
-        
-        if response.status_code == 200:
-            issues = response.json()
-            all_issues.extend([issue['title'] for issue in issues])
-            
-            if len(issues) < 100:
-                # If fewer than 100 issues were returned, this is the last page
-                break
-            else:
-                # Move to the next page
-                params['page'] += 1
-        else:
-            print(f"🔴 Failed to fetch issues. Status code: {response.status_code}")
-            raise ValueError("Problem while fetching issues.")
-    
-    return all_issues
-
-def get_issue(token, repo_slug , issue_number):
-    url = f"https://api.github.com/repos/{repo_slug}/issues/{issue_number}"
-    headers = {
-        'Accept': 'application/vnd.github.v3+json',
-        'Authorization': f'token {token}'
-    }
-    
-    response = requests.get(url, headers=headers)
-    
-    if response.status_code == 200:
-        return response.json()
-    else:
-        print(f"Failed to fetch issue {issue_number}. Status code: {response.status_code}")
-
+all_issues_title = None
 
 def already_issue_for_user(user):   
     # Iterate through all issues and check if the user matches
-    for existing_issue in all_issues:
+    for existing_issue in all_issues_title:
         # Extract the user from the existing issue title
         user_in_issue = existing_issue.split('/')[0].replace("[", "")
         if user == user_in_issue:
@@ -134,7 +85,6 @@ def create_github_issue(token, this_repo_slug, title, body, labels=None):
     }
     
     print(f"URL: {url}")
-    print(f"Token: {'*' * len(token)}")  # Avoid printing the actual token
     print(f"Headers: {headers}")
     print(f"Data: {data}")
 
@@ -157,7 +107,7 @@ def read_template_file(template_path, replacements):
     
     return template_content
 
-def fix_file_extensions_issue(repo):
+def fix_file_extensions_issue(token, repo):
     global all_issues
 
     try:
@@ -178,16 +128,16 @@ def fix_file_extensions_issue(repo):
 
         if repo['language'] == "Visual Basic .NET" and counts[".vb"] > 0 and counts[".vbproj"] == 0 and counts[".d.vb"] == 0 and counts[".bas"] == 0:       
             # VB.NET extension used for VBA code
-            create_issue_wrapper(repo, 'detected as Visual Basic .NET', 'Check A: Use of vb extension.md', 'Check A')
+            create_issue_wrapper(token, repo, 'detected as Visual Basic .NET', 'Check A: Use of vb extension.md', 'Check A')
         
         if repo['language'] == "VBScript" and counts[".vbs"] > 0 and counts[".vba"] == 0 and counts[".bas"] == 0:
             # VBScript extension used for VBA code
-            create_issue_wrapper(repo, 'detected as VBScript', 'Check B: Use of vbs extension.md', 'Check B')
+            create_issue_wrapper(token, repo, 'detected as VBScript', 'Check B: Use of vbs extension.md', 'Check B')
 
     except Exception as e:
         print(f"🔴 An unexpected error occurred: {e}")
 
-def create_issue_wrapper(repo, issue_title_suffix, template_name, label_name):
+def create_issue_wrapper(token, repo, issue_title_suffix, template_name, label_name):
         # Read and process the template file
         template_path = './templates/' + template_name
         replacements = {
@@ -213,8 +163,8 @@ def create_issue_wrapper(repo, issue_title_suffix, template_name, label_name):
 
         if issue_number != 0:
             try:
-                new_issue = get_issue(token, os.getenv('GITHUB_REPOSITORY'), issue_number)
-                all_issues.append(new_issue['title'])
+                new_issue = gh.get_issue(token, os.getenv('GITHUB_REPOSITORY'), issue_number)
+                all_issues_title.append(new_issue['title'])
             except Exception as e:
                 print(f"🔴 Error retrieving or appending the issue: {e}")
 
@@ -224,9 +174,8 @@ def get_slug(repo):
 def main():
 
     global all_issues
-    global token
     token = os.getenv('GITHUB_TOKEN')
-    all_issues = get_all_issues(token, os.getenv('GITHUB_REPOSITORY'))
+    all_issues_title = gh.get_all_issues_title(token, os.getenv('GITHUB_REPOSITORY'))
 
     query = 'VBA'
     query = 'VBA in:name,description'
@@ -262,7 +211,7 @@ def main():
                         continue
                         
                     print(f"Performing checks")
-                    fix_file_extensions_issue(repo)
+                    fix_file_extensions_issue(token, repo)
                         
                     print('-' * 40)
         else:
