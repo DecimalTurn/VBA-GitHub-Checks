@@ -213,7 +213,7 @@ def main():
                     print(f"Performing checks")
                     fix_file_extensions_issue(token, repo)
                         
-                    print('-' * 40)
+                print('-' * 40)
         else:
             print("No repositories found.")
 
