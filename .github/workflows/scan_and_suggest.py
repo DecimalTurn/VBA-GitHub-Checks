@@ -173,7 +173,7 @@ def get_slug(repo):
 
 def main():
 
-    global all_issues
+    global all_issues_title
     token = os.getenv('GITHUB_TOKEN')
     all_issues_title = gh.get_all_issues_title(token, os.getenv('GITHUB_REPOSITORY'))
 
