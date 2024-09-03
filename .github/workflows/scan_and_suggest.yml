@@ -3,7 +3,7 @@ name: VBA-Scan-And-Suggest
 on:
   workflow_dispatch:
   schedule:
-    - cron:  '0 16 * * *'
+  - cron:  '0 */3 * * *'
 
 permissions:
   issues: write  # Ensure the token has permission to create issues
