@@ -36,25 +36,6 @@ def search_github_repos(query, sort='updated', order='desc', per_page=10, page=1
         print(f"Failed to fetch data from GitHub API. Status code: {response.status_code}")
         return None
 
-def clone_repo(repo_url, destination_folder):
-
-    if repo_url == "":
-        print("🔴 Repo URL was empty")
-        return
-
-    if not os.path.exists(destination_folder):
-        os.makedirs(destination_folder)
-    
-    repo_name =  repo_url.split('/')[-2] + " --- " + repo_url.split('/')[-1]
-    repo_path = os.path.join(destination_folder, repo_name)
-    
-    if not os.path.exists(repo_path):
-        print(f"Cloning {repo_url} into {repo_path}")
-        subprocess.run(["git", "clone", repo_url, repo_path])
-        return repo_name
-    else:
-        print(f"Repository {repo_name} already exists in {destination_folder}.")
-        raise ValueError("Problem with cloning.")
 
 def count_vba_related_files(repo_path):
     vba_extensions = ['.bas', '.cls', '.frm', '.vba', '.vbs', '.vb', '.d.vb', '.vbproj']
@@ -113,7 +94,7 @@ def fix_file_extensions_issue(token, repo):
     try:
         # Clone the repo
         try:
-            repo_name = clone_repo(repo['html_url'], 'repos')
+            repo_name = gh.clone_repo(repo['html_url'], 'repos')
         except Exception as e:
             print(f"Error cloning the repo: {e}")
             return
