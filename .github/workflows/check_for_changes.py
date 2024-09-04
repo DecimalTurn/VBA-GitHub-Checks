@@ -14,12 +14,12 @@ import sys
 # Custom modules
 import gh
 
-all_issues = None
+all_open_issues = None
 
 def follow_up_issues(token, repo_slug):
-    global all_issues
+    global all_open_issues
     
-    for issue in all_issues:
+    for issue in all_open_issues:
         # Extract the user and repo_name from the issue title
         user = issue['title'].split('/')[0].replace("[", "")
         repo_name = issue['title'].split('/')[1].split(']')[0]
@@ -56,6 +56,8 @@ def follow_up_check_A(token, user, repo_name, issue):
     if not counts:
         print(f"Failed to get counts for issue: {issue['title']}")
         return
+
+    comment = ""
 
     # Part specific to Check A
     if repo_info['language'] == 'VBA':
@@ -143,9 +145,9 @@ def write_comment(token, repo_slug, issue, comment):
 
 def main():
 
-    global all_issues
+    global all_open_issues
     token = os.getenv('GITHUB_TOKEN')
-    all_issues = gh.get_all_issues(token, os.getenv('GITHUB_REPOSITORY'), 'open')
+    all_open_issues = gh.get_all_issues(token, os.getenv('GITHUB_REPOSITORY'), 'open')
 
     follow_up_issues(token, os.getenv('GITHUB_REPOSITORY'))
 
