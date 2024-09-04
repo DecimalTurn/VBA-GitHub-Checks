@@ -1,0 +1,29 @@
+name: VBA-Check-For-Changes
+
+on:
+  workflow_dispatch:
+  schedule:
+  - cron:  '0 16 * * *'
+
+permissions:
+  issues: write  # Ensure the token has permission to create issues
+
+jobs:
+  scan-and-suggest:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up Python 3.10
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.10"
+    - name: Install python dependencies
+      run: |
+        pwd
+        python -m pip install --upgrade pip
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+    - name: Run script
+      run: |
+        python './.github/workflows/check_for_changes.py'
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
