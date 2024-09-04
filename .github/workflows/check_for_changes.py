@@ -20,10 +20,7 @@ def follow_up_issues(token, repo_slug):
     global all_open_issues
     
     for issue in all_open_issues:
-        # Extract the user and repo_name from the issue title
-        user = issue['title'].split('/')[0].replace("[", "")
-        repo_name = issue['title'].split('/')[1].split(']')[0]
-        
+
         # See what Check is associated with the issue
         # The Check is based on the label (Check A, Check B, etc)
         check = gh.get_check(issue)
@@ -31,6 +28,10 @@ def follow_up_issues(token, repo_slug):
         if check == None:
             continue
 
+        # Extract the user and repo_name from the issue title
+        user = issue['title'].split('/')[0].replace("[", "")
+        repo_name = issue['title'].split('/')[1].split(']')[0]
+        
         if check == "A":
             follow_up_check_A(token, user, repo_name, issue)
         # elif check == "B":
@@ -79,7 +80,7 @@ def follow_up_check_A(token, user, repo_name, issue):
             comment += "There are still files with the .vb extension. Is this intentional?" + "\n"  
 
     if comment:
-        write_comment(token, repo_slug, issue, comment)
+        write_comment(token, os.getenv('GITHUB_REPOSITORY'), issue, comment)
 
 
 def get_repo_info(token, user, repo_name):
