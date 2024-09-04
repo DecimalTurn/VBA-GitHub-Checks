@@ -145,7 +145,7 @@ def main():
     query = 'VBA'
     query = 'VBA in:name,description'
     per_page = 50  # Number of repos to fetch per page
-    total_pages = 5  # Number of pages to check (you can adjust this value)
+    total_pages = 3  # Number of pages to check
 
     for page in range(1, total_pages + 1):
         print(f"Fetching page {page}...")
