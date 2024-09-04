@@ -1,20 +1,11 @@
-#Q: Should the outter loop be relative to the different Checks (A, B, C , etc) or one issue at a time?
-#A: from a degugging perspective, it would be nicer to have the logs grouped by types of checks to see how things behave
-#   from a preformance standpoint, it might be slightly better to have the outter loop be the Issues-iterator, but that should be minimal
-
-#todo:
+# Summary:
 # - Collect all open issues
 # - Filter by check/issue
-# - CheckA:
-# - Extract user and repo_name (repo slug)
-# - Get the infos on the repo
-# - Check the infos to see if language is VBA
-# - If yes, close the issue and write a comment.
-# - If no, check if at least some files now have the extension .vba
-    # - If yes, write a message saying that it's great that they changing the name of files from .vb to .vba, but there are still files with the .vb extension. Is that volontrary?
+# - CheckA
 
 # This script at the moment performs Subcheck A only
-# SubCheck A: Verify that now all files have the .vba extension and no longer have the .vb extension (.vbs for check B).
+# SubCheck AA: Verify that now all files have the .vba extension and no longer have the .vb extension (.vbs for check B).
+# SubCheck AB: Verify if the user intentionally left files with the .vb extension (.vbs for check B) in the repository.
 
 import requests
 import os
@@ -32,38 +23,58 @@ def follow_up_issues(token, repo_slug):
         # Extract the user and repo_name from the issue title
         user, repo_name = issue['title'].split('/')[0].replace("[", ""), issue['title'].split('/')[1].replace("]", "")
         
-        #Check if there is already a comment with the tag [SubCheck A] in the comments of the issue
-        if gh.already_commented(issue, "[SubCheck A]"):
-            print(f"Already commented on issue {issue['title']} for SubCheck A")
+        # See what Check is associated with the issue
+        # The Check is based on the label (Check A, Check B, etc)
+        check = gh.get_check(issue)
+
+        if check == None:
             continue
 
-        # Get the information on the repo
-        repo_info = get_repo_info(token, user, repo_name)
+        if check == "A":
+            follow_up_check_A(token, user, repo_name, issue)
+        # elif check == "B":
+        #     follow_up_check_B(token, user, repo_name, issue)
+
+
+def follow_up_check_A(token, user, repo_name, issue):
+
+    repo_slug = user + "/" + repo_name
+
+    # Check if there is already a comment with the tag [SubCheck A] in the comments of the issue
+    if gh.already_commented(issue, "[SubCheck A]"):
+        print(f"Already commented on issue {issue['title']} for SubCheck A")
+        return
+
+    # Get the information on the repo
+    repo_info = get_repo_info(token, user, repo_name)
+    counts = get_counts(token, user, repo_name)
+
+    if repo_info:
         
-        if repo_info:
-            # Check if the language is not VBA
-            if repo_info['language'] == 'VBA':
-                
-                if not gh.already_commented(issue, "[SubCheck A]"):
-                    comment = "Looks like you made some changes and the repository is now reported as VBA, great!" + "\n"
-
-                # Check if there are still files with the .vb extension if not, close the issue
-                if not has_vb_files(repo_info['repo_path']):
-                    comment += "This issue is now resolved, so I'm closing it. If you have any questions, feel free to ask." + "\n"
-                    close_issue(token, repo_slug, issue)
-                else:
-                    comment += "However, there are still files with the .vb extension. Is this intentional? [SubCheck A]" + "\n"               
-                
-            else:
-                # Check if there are now files with the .vba extension
-                if has_vba_files(repo_info['repo_path']) and not gh.already_commented(issue, "[SubCheck B]"):
-                    comment = "I see that you've made some changes to the files, but the repo is still reported as not VBA 🤔 [SubCheck B]. " + "\n"
+        # Check if the language is not VBA
+        if repo_info['language'] == 'VBA':
             
-            if comment:
-                write_comment(token, repo_slug, issue, comment)
+            if not gh.already_commented(issue, "[SubCheck AA]"):
+                comment = "Looks like you made some changes and the repository is now reported as VBA, great!" + "\n"
 
+            if counts['.vb'] == 0:
+                comment += "This issue is now resolved, so I'm closing it. If you have any questions, feel free to ask." + "\n"
+                gh.close_issue(token, repo_slug, issue)
+            else:
+                comment += "However, there are still files with the .vb extension. Is this intentional? [SubCheck AA]" + "\n"               
+            
         else:
-            print(f"Failed to get repo info for issue: {issue['title']}")
+
+            # Check if there are now files with the .vba extension
+            if counts['.vba'] > 0 and counts['.vb'] > 0 and not gh.already_commented(issue, "[SubCheck AB]"):
+                comment = "I see that you've made some changes to the files, but the repo is still reported as not VBA 🤔 [SubCheck AB]. " + "\n"
+                comment += "There are still files with the .vb extension. Is this intentional?" + "\n"  
+
+        if comment:
+            write_comment(token, repo_slug, issue, comment)
+
+    else:
+        print(f"Failed to get repo info for issue: {issue['title']}")
 
 def get_repo_info(token, user, repo_name):
     url = f"https://api.github.com/repos/{user}/{repo_name}"
@@ -76,40 +87,31 @@ def get_repo_info(token, user, repo_name):
     
     if response.status_code == 200:
         repo_info = response.json()
-        repo_info['repo_path'] = os.path.join('repos', f"{user} --- {repo_name}")
         return repo_info
     else:
         print(f"Failed to fetch repo info for {user}/{repo_name}. Status code: {response.status_code}")
         return None
 
-def has_vb_files(repo_path):
+def get_counts(token, user, repo_name):
     #This function is not implemented yet, return an error when called
-    print("Function has_vb_files not implemented yet.")
-    sys.exit(1)    
-    
+    #print("Function has_vb_files not implemented yet.")
+    #sys.exit(1)   
+   
+    # Clone the repo
+    html_url = f"https://github.com/{user}/{repo_name}"
+    try:
+        repo_name = gh.clone_repo(html_url, 'repos')
+    except Exception as e:
+        print(f"Error cloning the repo: {e}")
+        return
 
-def close_issue(token, repo_slug, issue):
-    issue_number = issue['number']
-    
-    if issue_number:
-        url = f"https://api.github.com/repos/{repo_slug}/issues/{issue_number}"
-        headers = {
-            'Accept': 'application/vnd.github.v3+json',
-            'Authorization': f'token {token}'
-        }
-        data = {
-            'state': 'closed'
-        }
-        
-        response = requests.patch(url, headers=headers, json=data)
-        
-        if response.status_code == 200:
-            print(f"🟢 Issue {issue_number} closed successfully")
-        else:
-            print(f"🔴 Failed to close issue {issue_number}. Status code: {response.status_code}")
-            print(response.json())
-    else:
-        print(f"Failed to get issue number for issue: {issue['title']}")
+    # Count the number of .vb files in the repo
+    repo_path = os.path.join('repos', repo_name)
+    try:
+        return gh.count_vba_related_files(repo_path)
+    except Exception as e:
+        print(f"🔴 Error counting VBA-related files: {e}")
+        return
 
 def write_comment(token, repo_slug, issue, comment):
     issue_number = issue['number']

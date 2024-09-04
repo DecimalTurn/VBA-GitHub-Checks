@@ -37,22 +37,6 @@ def search_github_repos(query, sort='updated', order='desc', per_page=10, page=1
         return None
 
 
-def count_vba_related_files(repo_path):
-    vba_extensions = ['.bas', '.cls', '.frm', '.vba', '.vbs', '.vb', '.d.vb', '.vbproj']
-    counts = {ext: 0 for ext in vba_extensions}
-    
-    for root, dirs, files in os.walk(repo_path):
-        for file in files:
-            for ext in vba_extensions:
-                if file.endswith(ext):
-                    counts[ext] += 1
-
-    # Print the counts
-    for ext, count in counts.items():
-        print(f"Number of '{ext}' files: {count}")
-    
-    return counts
-
 def create_github_issue(token, this_repo_slug, title, body, labels=None):
     url = f"https://api.github.com/repos/{this_repo_slug}/issues"
     headers = {
@@ -102,7 +86,7 @@ def fix_file_extensions_issue(token, repo):
         repo_path = os.path.join('repos', repo_name)
 
         try:
-            counts = count_vba_related_files(repo_path)
+            counts = gh.count_vba_related_files(repo_path)
         except Exception as e:
             print(f"🔴 Error counting VBA-related files: {e}")
             return
