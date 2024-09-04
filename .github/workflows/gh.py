@@ -88,12 +88,23 @@ def get_issue(token, repo_slug , issue_number):
         print(f"Failed to fetch issue {issue_number}. Status code: {response.status_code}")
 
 # Check if the issue already has a comment containing the provided substring
-def already_commented(issue, sub_string):
-    comments = issue['comments']
-    if comments > 0:
-        for comment in issue['comments']:
+def already_commented(token, repo_slug, issue_number, sub_string):
+    url = f"https://api.github.com/repos/{repo_slug}/issues/{issue_number}/comments"
+    headers = {
+        'Accept': 'application/vnd.github.v3+json',
+        'Authorization': f'token {token}'
+    }
+    response = requests.get(url, headers=headers)
+    
+    if response.status_code == 200:
+        comments = response.json()
+        for comment in comments:
             if sub_string in comment['body']:
                 return True
+    else:
+        print(f"Failed to fetch comments for issue {issue_number}. Status code: {response.status_code}")
+        raise ValueError("Problem while fetching comments.")
+    
     return False
 
 def close_issue(token, repo_slug, issue):
