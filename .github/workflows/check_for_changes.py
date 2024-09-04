@@ -40,6 +40,7 @@ def follow_up_issues(token, repo_slug):
 
 def follow_up_check_A(token, user, repo_name, issue):
 
+    issue_number = issue['number']
     repo_slug = user + "/" + repo_name
 
     # Get the information on the repo
@@ -58,7 +59,7 @@ def follow_up_check_A(token, user, repo_name, issue):
     # Part specific to Check A
     if repo_info['language'] == 'VBA':
         
-        if not gh.already_commented(token, repo_slug, issue, "[SubCheck AA]"):
+        if not gh.already_commented(token, repo_slug, issue_number, "[SubCheck AA]"):
             comment = "Looks like you made some changes and the repository is now reported as VBA, great!" + "\n"
 
         if counts['.vb'] == 0:
@@ -70,7 +71,7 @@ def follow_up_check_A(token, user, repo_name, issue):
     else:
 
         # Check if there are now files with the .vba extension
-        if counts['.vba'] > 0 and counts['.vb'] > 0 and not gh.already_commented(token, repo_slug, issue, "[SubCheck AB]"):
+        if counts['.vba'] > 0 and counts['.vb'] > 0 and not gh.already_commented(token, repo_slug, issue_number, "[SubCheck AB]"):
             comment = "I see that you've made some changes to the files, but the repo is still reported as not VBA 🤔. " + "\n"
             comment += "There are still files with the .vb extension. Is this intentional? [SubCheck AB]" + "\n"  
 
@@ -79,6 +80,7 @@ def follow_up_check_A(token, user, repo_name, issue):
 
 def follow_up_check_B(token, user, repo_name, issue):
 
+    issue_number = issue['number']
     repo_slug = user + "/" + repo_name
 
     # Get the information on the repo
@@ -98,7 +100,7 @@ def follow_up_check_B(token, user, repo_name, issue):
     if repo_info['language'] == 'VBA':
         
         
-        if not gh.already_commented(token, repo_slug, issue, "[SubCheck BA]"):
+        if not gh.already_commented(token, repo_slug, issue_number, "[SubCheck BA]"):
             comment = "Looks like you made some changes and the repository is now reported as VBA, great!" + "\n"
 
         if counts['.vbs'] == 0:
@@ -110,7 +112,7 @@ def follow_up_check_B(token, user, repo_name, issue):
     else:
 
         # Check if there are now files with the .vba extension
-        if counts['.vba'] > 0 and counts['.vbs'] > 0 and not gh.already_commented(token, repo_slug, issue, "[SubCheck BB]"):
+        if counts['.vba'] > 0 and counts['.vbs'] > 0 and not gh.already_commented(token, repo_slug, issue_number, "[SubCheck BB]"):
             comment = "I see that you've made some changes to the files, but the repo is still reported as not VBA 🤔." + "\n"
             comment += "There are still files with the .vbs extension. Is this intentional? [SubCheck BB]" + "\n"  
 
