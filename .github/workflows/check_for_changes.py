@@ -41,7 +41,7 @@ def follow_up_issues(token, repo_slug):
 def follow_up_check_A(token, user, repo_name, issue):
 
     issue_number = issue['number']
-    repo_slug = user + "/" + repo_name
+    main_repo_slug = os.getenv('GITHUB_REPOSITORY')
 
     # Get the information on the repo
     repo_info = get_repo_info(token, user, repo_name)
@@ -59,29 +59,29 @@ def follow_up_check_A(token, user, repo_name, issue):
     # Part specific to Check A
     if repo_info['language'] == 'VBA':
         
-        if not gh.already_commented(token, repo_slug, issue_number, "[SubCheck AA]"):
+        if not gh.already_commented(token, main_repo_slug, issue_number, "[SubCheck AA]"):
             comment = "Looks like you made some changes and the repository is now reported as VBA, great!" + "\n"
 
         if counts['.vb'] == 0:
             comment += "This issue is now resolved, so I'm closing it. If you have any questions, feel free to ask." + "\n"
-            gh.close_issue(token, repo_slug, issue)
+            gh.close_issue(token, main_repo_slug, issue)
         else:
             comment += "However, there are still files with the .vb extension. Is this intentional? [SubCheck AA]" + "\n"               
         
     else:
 
         # Check if there are now files with the .vba extension
-        if counts['.vba'] > 0 and counts['.vb'] > 0 and not gh.already_commented(token, repo_slug, issue_number, "[SubCheck AB]"):
+        if counts['.vba'] > 0 and counts['.vb'] > 0 and not gh.already_commented(token, main_repo_slug, issue_number, "[SubCheck AB]"):
             comment = "I see that you've made some changes to the files, but the repo is still reported as not VBA 🤔. " + "\n"
             comment += "There are still files with the .vb extension. Is this intentional? [SubCheck AB]" + "\n"  
 
     if comment:
-        write_comment(token, os.getenv('GITHUB_REPOSITORY'), issue, comment)
+        write_comment(token, main_repo_slug, issue, comment)
 
 def follow_up_check_B(token, user, repo_name, issue):
 
     issue_number = issue['number']
-    repo_slug = user + "/" + repo_name
+    main_repo_slug = os.getenv('GITHUB_REPOSITORY')
 
     # Get the information on the repo
     repo_info = get_repo_info(token, user, repo_name)
@@ -100,24 +100,24 @@ def follow_up_check_B(token, user, repo_name, issue):
     if repo_info['language'] == 'VBA':
         
         
-        if not gh.already_commented(token, repo_slug, issue_number, "[SubCheck BA]"):
+        if not gh.already_commented(token, main_repo_slug, issue_number, "[SubCheck BA]"):
             comment = "Looks like you made some changes and the repository is now reported as VBA, great!" + "\n"
 
         if counts['.vbs'] == 0:
             comment += "This issue is now resolved, so I'm closing it. If you have any questions, feel free to ask." + "\n"
-            gh.close_issue(token, repo_slug, issue)
+            gh.close_issue(token, main_repo_slug, issue)
         else:
             comment += "However, there are still files with the .vbs extension. Is this intentional? [SubCheck BA]" + "\n"               
         
     else:
 
         # Check if there are now files with the .vba extension
-        if counts['.vba'] > 0 and counts['.vbs'] > 0 and not gh.already_commented(token, repo_slug, issue_number, "[SubCheck BB]"):
+        if counts['.vba'] > 0 and counts['.vbs'] > 0 and not gh.already_commented(token, main_repo_slug, issue_number, "[SubCheck BB]"):
             comment = "I see that you've made some changes to the files, but the repo is still reported as not VBA 🤔." + "\n"
             comment += "There are still files with the .vbs extension. Is this intentional? [SubCheck BB]" + "\n"  
 
     if comment:
-        write_comment(token, os.getenv('GITHUB_REPOSITORY'), issue, comment)
+        write_comment(token, main_repo_slug, issue, comment)
 
 
 def get_repo_info(token, user, repo_name):
