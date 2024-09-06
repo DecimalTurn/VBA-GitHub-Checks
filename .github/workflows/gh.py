@@ -151,7 +151,7 @@ def clone_repo(repo_url, destination_folder):
         raise ValueError("Problem with cloning.")
     
 def count_vba_related_files(repo_path):
-    vba_extensions = ['.bas', '.cls', '.frm', '.vba', '.vbs', '.vb', '.d.vb', '.vbproj']
+    vba_extensions = ['.bas', '.cls', '.frm', '.vba', '.vbs', '.vb', '.d.vb', '.vbproj', 'No ext']
     counts = {ext: 0 for ext in vba_extensions}
     
     for root, dirs, files in os.walk(repo_path):
@@ -159,12 +159,22 @@ def count_vba_related_files(repo_path):
             for ext in vba_extensions:
                 if file.endswith(ext):
                     counts[ext] += 1
+                if ext == 'No ext' and '.' not in file:
+                    file_path = os.path.join(root, file)
+                    with open(file_path, 'r', encoding='cp1252') as f:
+                        file_content = f.read()
+                    if has_vba_code(file_content):
+                        counts[ext] += 1
 
     # Print the counts
     for ext, count in counts.items():
         print(f"Number of '{ext}' files: {count}")
     
     return counts
+
+def has_vba_code(file_content):
+    vba_pattern = re.compile(r'^\s*(Public|Private)?\s*(Sub|Function)\s+', re.MULTILINE)
+    return bool(vba_pattern.search(file_content))
 
 # Get the labels for the issue and extract the name of the check (Check A, Check B, etc.)
 def get_check(issue):
