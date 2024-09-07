@@ -2,6 +2,7 @@
 import os
 import requests
 import subprocess
+import re
 
 def get_all_issues_title(token, repo_slug):
     url = f"https://api.github.com/repos/{repo_slug}/issues"
