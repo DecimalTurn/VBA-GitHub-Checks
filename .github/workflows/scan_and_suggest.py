@@ -100,7 +100,9 @@ def fix_file_extensions_issue(token, repo):
             create_issue_wrapper(token, repo, 'detected as VBScript', 'Check B: Use of vbs extension.md', 'Check B')
 
         if repo['language'] is None and counts['No ext'] > 0:
-            print(f"🔴 The repo contains VBA files with no file extension")
+            # No extension used for VBA code
+            create_issue_wrapper(token, repo, 'is not detected as VBA', 'Check C: Use of no extension.md', 'Check C')
+
 
     except Exception as e:
         print(f"🔴 An unexpected error occurred: {e}")
