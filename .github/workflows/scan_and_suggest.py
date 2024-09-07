@@ -170,12 +170,13 @@ def main():
                 print(f"URL: {repo['html_url']}")
                 print(f"Updated at: {repo['updated_at']}")
                 
-                if repo['language'] == "Visual Basic .NET" or repo['language'] == "VBScript" or repo['language'] == "None":
+                if repo['language'] == "Visual Basic .NET" or repo['language'] == "VBScript" or repo['language'] is None:
                     print("")
 
                     user = repo['owner']['login']
                     if already_issue_for_user(user):
                         print(f"🟡 Issue already exists for user: {user}")
+                        print('-' * 40)
                         continue
                         
                     print(f"Performing checks")
