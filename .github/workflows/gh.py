@@ -162,6 +162,7 @@ def count_vba_related_files(repo_path):
                     counts[ext] += 1
                 if ext == 'No ext' and '.' not in file:
                     file_path = os.path.join(root, file)
+                    print(f"{file}")
                     with open(file_path, 'r', encoding='cp1252') as f:
                         file_content = f.read()
                     if has_vba_code(file_content):
