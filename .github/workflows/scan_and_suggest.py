@@ -170,7 +170,7 @@ def main():
                 print(f"URL: {repo['html_url']}")
                 print(f"Updated at: {repo['updated_at']}")
                 
-                if repo['language'] == "Visual Basic .NET" or repo['language'] == "VBScript":
+                if repo['language'] == "Visual Basic .NET" or repo['language'] == "VBScript" or repo['language'] == "None":
                     print("")
 
                     user = repo['owner']['login']
