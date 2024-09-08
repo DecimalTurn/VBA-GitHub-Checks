@@ -66,7 +66,7 @@ def follow_up_check_A(token, user, repo_name, issue):
 
         if counts['.vb'] == 0:
             comment += "This issue is now resolved, so I'm closing it. If you have any questions, feel free to ask." + "\n"
-            gh.close_issue(token, main_repo_slug, issue)
+            gh.close_issue(token, main_repo_slug, issue, "completed")
         else:
             comment += "However, there are still files with the .vb extension. Is this intentional? [SubCheck AA]" + "\n"               
         
@@ -107,7 +107,7 @@ def follow_up_check_B(token, user, repo_name, issue):
 
         if counts['.vbs'] == 0:
             comment += "This issue is now resolved, so I'm closing it. If you have any questions, feel free to ask." + "\n"
-            gh.close_issue(token, main_repo_slug, issue)
+            gh.close_issue(token, main_repo_slug, issue, "completed")
         else:
             comment += "However, there are still files with the .vbs extension. Is this intentional? [SubCheck BA]" + "\n"               
         
@@ -147,7 +147,7 @@ def follow_up_check_C(token, user, repo_name, issue):
 
         if counts['No ext'] == 0:
             comment += "This issue is now resolved, so I'm closing it. If you have any questions, feel free to ask." + "\n"
-            gh.close_issue(token, main_repo_slug, issue)
+            gh.close_issue(token, main_repo_slug, issue, "completed")
         else:
             comment += "However, there are still files with no extension that contain VBA code. Is this intentional? [SubCheck CA]" + "\n"   
            

@@ -108,7 +108,7 @@ def already_commented(token, repo_slug, issue_number, sub_string):
     
     return False
 
-def close_issue(token, repo_slug, issue):
+def close_issue(token, repo_slug, issue, reason):
     issue_number = issue['number']
     
     if issue_number:
@@ -118,7 +118,8 @@ def close_issue(token, repo_slug, issue):
             'Authorization': f'token {token}'
         }
         data = {
-            'state': 'closed'
+            'state': 'closed',
+            'state_reason': reason
         }
         
         response = requests.patch(url, headers=headers, json=data)
