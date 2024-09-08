@@ -1,0 +1,23 @@
+name: 'Mark stale issues'
+
+on:
+  schedule:
+    - cron: '0 17 * * *' # Runs every day at 17h UTC
+
+jobs:
+  stale:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Run stale action
+      uses: actions/stale@v8
+      with:
+        repo-token: ${{ secrets.GITHUB_TOKEN }}
+        stale-issue-message: 'This issue has been marked as stale due to inactivity for 30 days. If you need help or have any questions, feel free to ask.'
+        days-before-stale: 30
+        days-before-close: 30
+        stale-issue-label: 'stale'
+        only-labels: 'external'
+        close-issue-message: 'Closing this issue due to prolonged inactivity. You can still fix this issue, but it won''t be tracked here.'
+        remove-stale-when-updated: true
+        close-issue-reason: 'not_planned'
