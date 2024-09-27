@@ -22,6 +22,7 @@ jobs:
       with:
         repo-token: ${{ secrets.GITHUB_TOKEN }}
         stale-issue-message: 'This issue has been marked as stale due to inactivity for 30 days. If you need help or have any questions, feel free to ask.'
+        days-before-stale: ${{ matrix.days-before-stale }}
         days-before-close: 30
         stale-issue-label: 'stale'
         only-labels: 'external'
