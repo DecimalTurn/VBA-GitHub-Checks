@@ -1,0 +1,31 @@
+name: 'Mark stale issues'
+
+on: 
+  workflow_dispatch
+
+jobs:
+  stale:
+    runs-on: ubuntu-latest
+
+    permissions:
+      issues: write
+
+    name: Run Task in Loop
+
+    strategy:
+      matrix:
+        days-before-stale: [31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75]
+
+    steps:
+    - name: Run stale action
+      uses: actions/stale@v8
+      with:
+        repo-token: ${{ secrets.GITHUB_TOKEN }}
+        stale-issue-message: 'This issue has been marked as stale due to inactivity for 30 days. If you need help or have any questions, feel free to ask.'
+        days-before-stale: 30
+        days-before-close: 30
+        stale-issue-label: 'stale'
+        only-labels: 'external'
+        close-issue-message: 'Closing this issue due to prolonged inactivity. You can still fix this issue, but it won''t be tracked here.'
+        remove-stale-when-updated: true
+        close-issue-reason: 'not_planned'
