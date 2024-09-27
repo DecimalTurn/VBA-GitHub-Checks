@@ -67,7 +67,7 @@ def follow_up_check_A(token, user, repo_name, issue):
         if counts['.vb'] == 0:
             comment += "This issue is now resolved, so I'm closing it. If you have any questions, feel free to ask." + "\n"
             gh.close_issue(token, main_repo_slug, issue, "completed")
-            gh.add_label_to_issue(token, main_repo_slug, issue_number, "completed")
+            handle_labels_after_completion(token, main_repo_slug, issue_number)
         else:
             comment += "However, there are still files with the .vb extension. Is this intentional? [SubCheck AA]" + "\n"               
         
@@ -109,7 +109,7 @@ def follow_up_check_B(token, user, repo_name, issue):
         if counts['.vbs'] == 0:
             comment += "This issue is now resolved, so I'm closing it. If you have any questions, feel free to ask." + "\n"
             gh.close_issue(token, main_repo_slug, issue, "completed")
-            add_label_to_issue(token, main_repo_slug, issue_number, "completed")
+            handle_labels_after_completion(token, main_repo_slug, issue_number)
         else:
             comment += "However, there are still files with the .vbs extension. Is this intentional? [SubCheck BA]" + "\n"               
         
@@ -150,7 +150,7 @@ def follow_up_check_C(token, user, repo_name, issue):
         if counts['No ext'] == 0:
             comment += "This issue is now resolved, so I'm closing it. If you have any questions, feel free to ask." + "\n"
             gh.close_issue(token, main_repo_slug, issue, "completed")
-            gh.add_label_to_issue(token, main_repo_slug, issue_number, "completed")
+            handle_labels_after_completion(token, main_repo_slug, issue_number)
         else:
             comment += "However, there are still files with no extension that contain VBA code. Is this intentional? [SubCheck CA]" + "\n"   
            
@@ -163,6 +163,10 @@ def follow_up_check_C(token, user, repo_name, issue):
 
     if comment:
         write_comment(token, main_repo_slug, issue, comment)
+
+def handle_labels_after_completion(token, main_repo_slug, issue_number):
+    gh.add_label_to_issue(token, main_repo_slug, issue_number, "completed")
+    gh.remove_label_from_issue(token, main_repo_slug, issue_number, "stale")  
 
 def get_repo_info(token, user, repo_name):
     url = f"https://api.github.com/repos/{user}/{repo_name}"

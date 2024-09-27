@@ -124,6 +124,21 @@ def add_label_to_issue(token, repo_slug, issue_number, label):
         print(f"🔴 Failed to add label to issue {issue_number}. Status code: {response.status_code}")
         print(response.json())
 
+def remove_label_from_issue(token, repo_slug, issue_number, label):
+    url = f"https://api.github.com/repos/{repo_slug}/issues/{issue_number}/labels/{label}"
+    headers = {
+        'Accept': 'application/vnd.github.v3+json',
+        'Authorization': f'token {token}'
+    }
+    
+    response = requests.delete(url, headers=headers)
+    
+    if response.status_code == 200:
+        print(f"🟢 Label '{label}' removed from issue {issue_number} successfully")
+    else:
+        print(f"🔴 Failed to remove label from issue {issue_number}. Status code: {response.status_code}")
+        print(response.json())
+
 def close_issue(token, repo_slug, issue, reason):
     issue_number = issue['number']
     
