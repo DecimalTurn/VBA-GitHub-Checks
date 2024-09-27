@@ -108,6 +108,22 @@ def already_commented(token, repo_slug, issue_number, sub_string):
     
     return False
 
+def add_label_to_issue(token, repo_slug, issue_number, label):
+    url = f"https://api.github.com/repos/{repo_slug}/issues/{issue_number}/labels"
+    headers = {
+        'Accept': 'application/vnd.github.v3+json',
+        'Authorization': f'token {token}'
+    }
+    data = [label]
+    
+    response = requests.post(url, headers=headers, json=data)
+    
+    if response.status_code == 200:
+        print(f"🟢 Label '{label}' added to issue {issue_number} successfully")
+    else:
+        print(f"🔴 Failed to add label to issue {issue_number}. Status code: {response.status_code}")
+        print(response.json())
+
 def close_issue(token, repo_slug, issue, reason):
     issue_number = issue['number']
     
