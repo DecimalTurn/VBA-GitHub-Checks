@@ -61,7 +61,8 @@ def follow_up_check_A(token, user, repo_name, issue):
     # Part specific to Check A
     if repo_info['language'] == 'VBA':
         
-        if not gh.already_commented(token, main_repo_slug, issue_number, "[SubCheck AA]"):
+        subCheck = gh.already_commented(token, main_repo_slug, issue_number, "[SubCheck AA]")
+        if not subCheck:
             comment = "Looks like you made some changes and the repository is now reported as VBA, great!" + "\n"
 
         if counts['.vb'] == 0:
@@ -69,7 +70,8 @@ def follow_up_check_A(token, user, repo_name, issue):
             gh.close_issue(token, main_repo_slug, issue, "completed")
             handle_labels_after_completion(token, main_repo_slug, issue_number)
         else:
-            comment += "However, there are still files with the .vb extension. Is this intentional? [SubCheck AA]" + "\n"               
+            if not subCheck:
+                comment += "However, there are still files with the .vb extension. Is this intentional? [SubCheck AA]" + "\n"               
         
     else:
 
@@ -102,8 +104,8 @@ def follow_up_check_B(token, user, repo_name, issue):
     # Part specific to Check B
     if repo_info['language'] == 'VBA':
         
-        
-        if not gh.already_commented(token, main_repo_slug, issue_number, "[SubCheck BA]"):
+        subCheck = gh.already_commented(token, main_repo_slug, issue_number, "[SubCheck BA]")
+        if not subCheck:
             comment = "Looks like you made some changes and the repository is now reported as VBA, great!" + "\n"
 
         if counts['.vbs'] == 0:
@@ -111,7 +113,8 @@ def follow_up_check_B(token, user, repo_name, issue):
             gh.close_issue(token, main_repo_slug, issue, "completed")
             handle_labels_after_completion(token, main_repo_slug, issue_number)
         else:
-            comment += "However, there are still files with the .vbs extension. Is this intentional? [SubCheck BA]" + "\n"               
+            if not subCheck:
+                comment += "However, there are still files with the .vbs extension. Is this intentional? [SubCheck BA]" + "\n"               
         
     else:
 
@@ -144,7 +147,8 @@ def follow_up_check_C(token, user, repo_name, issue):
     # Part specific to Check C
     if repo_info['language'] == 'VBA':
 
-        if not gh.already_commented(token, main_repo_slug, issue_number, "[SubCheck CA]"):
+        subCheck = gh.already_commented(token, main_repo_slug, issue_number, "[SubCheck CA]")
+        if not subCheck:
             comment = "Looks like you made some changes and the repository is now reported as VBA, great!" + "\n"
 
         if counts['No ext'] == 0:
@@ -152,7 +156,8 @@ def follow_up_check_C(token, user, repo_name, issue):
             gh.close_issue(token, main_repo_slug, issue, "completed")
             handle_labels_after_completion(token, main_repo_slug, issue_number)
         else:
-            comment += "However, there are still files with no extension that contain VBA code. Is this intentional? [SubCheck CA]" + "\n"   
+            if not subCheck:
+                comment += "However, there are still files with no extension that contain VBA code. Is this intentional? [SubCheck CA]" + "\n"   
            
     else:
 
