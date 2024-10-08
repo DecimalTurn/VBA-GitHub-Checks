@@ -117,7 +117,7 @@ def create_issue_wrapper(token, repo, issue_title_suffix, template_name, label_n
         }
 
         slug = get_slug(repo)
-        issue_title = f"{slug} {issue_title_suffix}"
+        issue_title = f"[{slug}] {issue_title_suffix}"
         
         try:
             issue_body = read_template_file(template_path, replacements)
