@@ -93,11 +93,11 @@ def fix_file_extensions_issue(token, repo):
 
         if repo['language'] == "Visual Basic .NET" and counts[".vb"] > 0 and counts[".vbproj"] == 0 and counts[".d.vb"] == 0 and counts[".bas"] == 0:       
             # VB.NET extension used for VBA code
-            create_issue_wrapper(token, repo, 'detected as Visual Basic .NET', 'Check A: Use of vb extension.md', 'Check A')
+            create_issue_wrapper(token, repo, 'is detected as Visual Basic .NET', 'Check A: Use of vb extension.md', 'Check A')
         
         if repo['language'] == "VBScript" and counts[".vbs"] > 0 and counts[".vba"] == 0 and counts[".bas"] == 0:
             # VBScript extension used for VBA code
-            create_issue_wrapper(token, repo, 'detected as VBScript', 'Check B: Use of vbs extension.md', 'Check B')
+            create_issue_wrapper(token, repo, 'is detected as VBScript', 'Check B: Use of vbs extension.md', 'Check B')
 
         if repo['language'] is None and counts['No ext'] > 0:
             # No extension used for VBA code
@@ -117,7 +117,7 @@ def create_issue_wrapper(token, repo, issue_title_suffix, template_name, label_n
         }
 
         slug = get_slug(repo)
-        issue_title = f"[{slug}] {issue_title_suffix}"
+        issue_title = f"{slug} {issue_title_suffix}"
         
         try:
             issue_body = read_template_file(template_path, replacements)
