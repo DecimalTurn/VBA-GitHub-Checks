@@ -16,6 +16,7 @@ jobs:
       uses: actions/stale@v8
       with:
         repo-token: ${{ secrets.GITHUB_TOKEN }}
+        operations-per-run: 100
         stale-issue-message: 'This issue has been marked as stale due to inactivity for 30 days. If you need help or have any questions, feel free to ask.'
         days-before-stale: 30
         days-before-close: 30
