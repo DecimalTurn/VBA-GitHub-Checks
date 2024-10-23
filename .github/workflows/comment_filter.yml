@@ -12,3 +12,5 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: DecimalTurn/Comment-Filter@v0
+      with:
+        exclude-contributors: true
