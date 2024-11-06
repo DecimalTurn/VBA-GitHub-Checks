@@ -193,10 +193,10 @@ def count_vba_related_files(repo_path):
         for file in files:
             file_path = os.path.join(root, file)
             for ext in vba_extensions:
-                if ext == ".txt":
-                    if is_vba_file(file_path):
+                if ext == ".txt" :
+                    if file.endswith(ext) and is_vba_file(file_path):
                         counts[ext] += 1
-                        continue
+                    continue
                 if file.endswith(ext):
                     counts[ext] += 1
                     continue

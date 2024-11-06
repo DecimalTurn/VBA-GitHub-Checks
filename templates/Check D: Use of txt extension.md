@@ -4,7 +4,7 @@ It seems like there is a small issue with your repo named [%{reponame}%](%{url}%
 
 Currently, it is not marked as a VBA repo because the files that contain your VBA code are using the .txt file extension.
 
-<img src="https://raw.githubusercontent.com/DecimalTurn/VBA-on-GitHub-Automations/main/assets/txt-extension.svg">
+<img src="https://raw.githubusercontent.com/DecimalTurn/VBA-on-GitHub-Automations/main/assets/txt-file-extension.svg">
 
 To solve this issue and make sure that files in your repo are correctly identified as VBA, you could simply change the file extensions to `.vba`
 
