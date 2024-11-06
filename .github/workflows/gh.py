@@ -191,16 +191,17 @@ def count_vba_related_files(repo_path):
         # Remove the '.git' directory from the list of directories to avoid descending into it
         dirs[:] = [d for d in dirs if d != '.git']
         for file in files:
+            file_path = os.path.join(root, file)
             for ext in vba_extensions:
                 if ext == ".txt":
-                    if is_vba_file(file):
+                    if is_vba_file(file_path):
                         counts[ext] += 1
                         continue
                 if file.endswith(ext):
                     counts[ext] += 1
                     continue
                 if ext == 'No ext' and '.' not in file:
-                    if is_vba_file(file):
+                    if is_vba_file(file_path):
                         counts[ext] += 1
                         continue
 
@@ -210,9 +211,7 @@ def count_vba_related_files(repo_path):
     
     return counts
 
-def is_vba_file(file):
-    file_path = os.path.join(root, file)
-    print(f"{file}")
+def is_vba_file(file_path):
     with open(file_path, 'r', encoding='cp1252', errors='ignore') as f:
         file_content = f.read()
     return has_vba_code(file_content)
