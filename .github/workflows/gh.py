@@ -193,25 +193,32 @@ def count_vba_related_files(repo_path):
         for file in files:
             for ext in vba_extensions:
                 if ext == ".txt":
-                    if has_vba_code(file_content):
+                    if is_vba_file(file):
                         counts[ext] += 1
                         continue
                 if file.endswith(ext):
                     counts[ext] += 1
                     continue
                 if ext == 'No ext' and '.' not in file:
-                    file_path = os.path.join(root, file)
-                    print(f"{file}")
-                    with open(file_path, 'r', encoding='cp1252', errors='ignore') as f:
-                        file_content = f.read()
-                    if has_vba_code(file_content):
+                    if is_vba_file(file):
                         counts[ext] += 1
+                        continue
 
     # Print the counts
     for ext, count in counts.items():
         print(f"Number of '{ext}' files: {count}")
     
     return counts
+
+def is_vba_file(file)
+    file_path = os.path.join(root, file)
+    print(f"{file}")
+    with open(file_path, 'r', encoding='cp1252', errors='ignore') as f:
+        file_content = f.read()
+    if has_vba_code(file_content):
+        return True
+    else
+        return False
 
 def has_vba_code(file_content):
     vba_pattern = re.compile(r'^\s*(Public|Private)?\s*(Sub|Function)\s+', re.MULTILINE)
