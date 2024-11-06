@@ -210,7 +210,7 @@ def count_vba_related_files(repo_path):
     
     return counts
 
-def is_vba_file(file)
+def is_vba_file(file):
     file_path = os.path.join(root, file)
     print(f"{file}")
     with open(file_path, 'r', encoding='cp1252', errors='ignore') as f:
