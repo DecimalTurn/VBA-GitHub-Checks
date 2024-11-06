@@ -103,6 +103,9 @@ def fix_file_extensions_issue(token, repo):
             # No extension used for VBA code
             create_issue_wrapper(token, repo, 'is not detected as VBA', 'Check C: Use of no extension.md', 'Check C')
 
+        if repo['language'] is None and counts[".txt"] > 0:
+            # txt extension used for VBA code
+            create_issue_wrapper(token, repo, 'is not detected as VBA', 'Check D: Use of txt extension.md', 'Check D')
 
     except Exception as e:
         print(f"🔴 An unexpected error occurred: {e}")

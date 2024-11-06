@@ -38,6 +38,8 @@ def follow_up_issues(token, repo_slug):
              follow_up_check_B(token, user, repo_name, issue)
         elif check == "C":
              follow_up_check_C(token, user, repo_name, issue)
+        elif check == "D":
+             follow_up_check_C(token, user, repo_name, issue)
 
 
 def follow_up_check_A(token, user, repo_name, issue):
@@ -165,6 +167,49 @@ def follow_up_check_C(token, user, repo_name, issue):
         if counts['.vba'] > 0 and counts['No ext'] > 0 and not gh.already_commented(token, main_repo_slug, issue_number, "[SubCheck CB]"):
             comment = "I see that you've made some changes to the files, but the repo is still reported as not VBA 🤔." + "\n"
             comment += "There are still files with no extension that contain VBA code. Is this intentional? [SubCheck CB]" + "\n"  
+
+    if comment:
+        write_comment(token, main_repo_slug, issue, comment)
+
+def follow_up_check_D(token, user, repo_name, issue):
+
+    issue_number = issue['number']
+    main_repo_slug = os.getenv('GITHUB_REPOSITORY')
+
+    # Get the information on the repo
+    repo_info = get_repo_info(token, user, repo_name)
+    if not repo_info:
+        print(f"Failed to get repo info for issue: {issue['title']}")
+        return
+
+    counts = get_counts(token, user, repo_name)
+    if not counts:
+        print(f"Failed to get counts for issue: {issue['title']}")
+        return
+
+    comment = ""
+
+    # Part specific to Check D
+    if repo_info['language'] == 'VBA':
+
+        subCheck = gh.already_commented(token, main_repo_slug, issue_number, "[SubCheck DA]")
+        if not subCheck:
+            comment = "Looks like you made some changes and the repository is now reported as VBA, great!" + "\n"
+
+        if counts['.txt'] == 0:
+            comment += "This issue is now resolved, so I'm closing it. If you have any questions, feel free to ask." + "\n"
+            gh.close_issue(token, main_repo_slug, issue, "completed")
+            handle_labels_after_completion(token, main_repo_slug, issue_number)
+        else:
+            if not subCheck:
+                comment += "However, there are still files with the .txt extension that contain VBA code. Is this intentional? [SubCheck DA]" + "\n"   
+           
+    else:
+
+        # Check if there are now files with the .vba extension
+        if counts['.vba'] > 0 and counts['.txt'] > 0 and not gh.already_commented(token, main_repo_slug, issue_number, "[SubCheck DB]"):
+            comment = "I see that you've made some changes to the files, but the repo is still reported as not VBA 🤔." + "\n"
+            comment += "There are still files with the .txt extension that contain VBA code. Is this intentional? [SubCheck DB]" + "\n"  
 
     if comment:
         write_comment(token, main_repo_slug, issue, comment)

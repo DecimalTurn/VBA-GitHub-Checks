@@ -1,0 +1,18 @@
+<svg width="1148" height="175" xmlns="http://www.w3.org/2000/svg"
+    xmlns:xlink="http://www.w3.org/1999/xlink" overflow="hidden">
+    <g>
+        <rect x="0" y="0" width="1148" height="175" stroke="#042433" stroke-width="2"
+            stroke-miterlimit="8" fill="#0D1117" />
+        <text fill="#E6EDF3"
+            font-family="Segoe UI Semibold,Segoe UI Semibold_MSFontService,sans-serif"
+            font-weight="600" font-size="49" transform="translate(52.6993 101)">Filename.txt</text>
+        <path
+            d="M420 79 526.7 79.0001 526.7 87.0001 420 87ZM522.7 71.0001 546.7 83.0001 522.7 95.0001Z"
+            fill="#F2F2F2" />
+        <text fill="#E6EDF3"
+            font-family="Segoe UI Semibold,Segoe UI Semibold_MSFontService,sans-serif"
+            font-weight="600" font-size="49" transform="translate(756.44 101)">?????</text>
+        <text fill="#E6EDF3" font-family="Segoe UI Emoji,Segoe UI Emoji_MSFontService,sans-serif"
+            font-weight="400" font-size="49" transform="translate(871.107 101)">🤔</text>
+    </g>
+</svg>
