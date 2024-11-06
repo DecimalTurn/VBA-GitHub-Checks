@@ -16,6 +16,7 @@ This repo uses automated scripts via GitHub Actions to check for newly updated V
 * Check A: VBA code files are using the Visual Basic .NET file extension.
 * Check B: VBA code files are using the VBScript file extension.
 * Check C: VBA code files are using no file extension.
+* Check D: VBA code files are using the `txt` file extension.
 
 ## More info
 If you are looking for more info on how to configure your VBA repos, check out [VBA-on-GitHub](https://github.com/DecimalTurn/VBA-on-GitHub). 
