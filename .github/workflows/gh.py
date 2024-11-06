@@ -215,7 +215,7 @@ def is_vba_file(file):
     print(f"{file}")
     with open(file_path, 'r', encoding='cp1252', errors='ignore') as f:
         file_content = f.read()
-    return has_vba_code(file_content):
+    return has_vba_code(file_content)
 
 def has_vba_code(file_content):
     vba_pattern = re.compile(r'^\s*(Public|Private)?\s*(Sub|Function)\s+', re.MULTILINE)
