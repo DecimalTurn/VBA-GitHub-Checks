@@ -12,6 +12,7 @@ jobs:
     permissions:
       issues: write
       contents: write
+      actions: write
 
     steps:
     - name: Run stale action
