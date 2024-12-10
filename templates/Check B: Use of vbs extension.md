@@ -20,7 +20,7 @@ By using the `.vba` extension, you make sure that all you VBA code will be corre
 
 ```gitattributes
 
-*.vb linguist-language=vba
+*.vbs linguist-language=vba
 
 ```
 
