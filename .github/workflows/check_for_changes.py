@@ -10,6 +10,7 @@
 import requests
 import os
 import sys
+import re
 
 # Custom modules
 import gh
@@ -63,11 +64,15 @@ def follow_up_check_A(token, user, repo_name, issue):
     # Part specific to Check A
     if repo_info['language'] == 'VBA':
         
-        subCheck = gh.already_commented(token, main_repo_slug, issue_number, "[SubCheck AA]")
+        subCheck = False
+        gitattribute_override = check_gitattributes(token, user, repo_name, 'vb')
+        if not gitattribute_override:
+            subCheck = gh.already_commented(token, main_repo_slug, issue_number, "[SubCheck AA]")
+
         if not subCheck:
             comment = "Looks like you made some changes and the repository is now reported as VBA, great!" + "\n"
 
-        if counts['.vb'] == 0:
+        if counts['.vb'] == 0 or gitattribute_override:
             comment += "This issue is now resolved, so I'm closing it. If you have any questions, feel free to ask." + "\n"
             gh.close_issue(token, main_repo_slug, issue, "completed")
             handle_labels_after_completion(token, main_repo_slug, issue_number)
@@ -106,11 +111,15 @@ def follow_up_check_B(token, user, repo_name, issue):
     # Part specific to Check B
     if repo_info['language'] == 'VBA':
         
-        subCheck = gh.already_commented(token, main_repo_slug, issue_number, "[SubCheck BA]")
+        subCheck = False
+        gitattribute_override = check_gitattributes(token, user, repo_name, 'vbs')
+        if not gitattribute_override:
+            subCheck = gh.already_commented(token, main_repo_slug, issue_number, "[SubCheck BA]")
+        
         if not subCheck:
             comment = "Looks like you made some changes and the repository is now reported as VBA, great!" + "\n"
 
-        if counts['.vbs'] == 0:
+        if counts['.vbs'] == 0 or gitattribute_override:
             comment += "This issue is now resolved, so I'm closing it. If you have any questions, feel free to ask." + "\n"
             gh.close_issue(token, main_repo_slug, issue, "completed")
             handle_labels_after_completion(token, main_repo_slug, issue_number)
@@ -192,11 +201,15 @@ def follow_up_check_D(token, user, repo_name, issue):
     # Part specific to Check D
     if repo_info['language'] == 'VBA':
 
-        subCheck = gh.already_commented(token, main_repo_slug, issue_number, "[SubCheck DA]")
+        subCheck = False
+        gitattribute_override = check_gitattributes(token, user, repo_name, 'txt')
+        if not gitattribute_override:
+            subCheck = gh.already_commented(token, main_repo_slug, issue_number, "[SubCheck DA]")
+
         if not subCheck:
             comment = "Looks like you made some changes and the repository is now reported as VBA, great!" + "\n"
 
-        if counts['.txt'] == 0:
+        if counts['.txt'] == 0 or gitattribute_override:
             comment += "This issue is now resolved, so I'm closing it. If you have any questions, feel free to ask." + "\n"
             gh.close_issue(token, main_repo_slug, issue, "completed")
             handle_labels_after_completion(token, main_repo_slug, issue_number)
@@ -213,6 +226,22 @@ def follow_up_check_D(token, user, repo_name, issue):
 
     if comment:
         write_comment(token, main_repo_slug, issue, comment)
+
+# This function looks inside the gitattributes file of the repository to check if the they added a rule to 
+# consider the extension as VBA via the linguist-language override
+def check_gitattributes(token, user, repo_name, ext):
+    # The repo should already be cloned at this stage, so we look directly in the gitattributes file
+    repo_path = os.path.join('repos', repo_name)
+    gitattributes_path = os.path.join(repo_path, '.gitattributes')
+    if not os.path.exists(gitattributes_path):
+        return False
+    
+    # Check if there is a line with the pattern *.ext linguist-language=VBA
+    pattern = re.compile(rf"\*\.{ext}\s+.*\blinguist-language=VBA")
+    with open(gitattributes_path, 'r') as file:
+        for line in file:
+            if pattern.search(line):
+                return True
 
 def handle_labels_after_completion(token, main_repo_slug, issue_number):
     gh.add_label_to_issue(token, main_repo_slug, issue_number, "completed")
