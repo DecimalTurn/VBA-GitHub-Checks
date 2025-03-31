@@ -9,7 +9,7 @@ permissions:
   issues: write  # Ensure the token has permission to create issues
 
 jobs:
-  scan-and-suggest:
+  check-for-changes:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
