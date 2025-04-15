@@ -230,3 +230,12 @@ def get_check(issue):
                 if label['name'].startswith(check_prefix):
                     return label['name'][len(check_prefix):]
     return None
+
+# Check if the repo is deleted by checking if the repo_url returns a 404
+# NB.: Because this is a simple https request, we don't need to pass the token
+def check_repo_deleted(repo_url):
+    response = requests.get(repo_url)
+    if response.status_code == 404:
+        return True
+    else:
+        return False

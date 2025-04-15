@@ -1,11 +1,7 @@
 # Summary:
 # - Collect all open issues
 # - Filter by check/issue
-# - CheckA
 
-# This script at the moment performs Subcheck A only
-# SubCheck AA: Verify that now all files have the .vba extension and no longer have the .vb extension (.vbs for check B).
-# SubCheck AB: Verify if the user intentionally left files with the .vb extension (.vbs for check B) in the repository.
 
 import requests
 import os
@@ -32,6 +28,15 @@ def follow_up_issues(token, repo_slug):
         # Extract the user and repo_name from the issue title
         user = issue['title'].split('/')[0].replace("[", "")
         repo_name = issue['title'].split('/')[1].split(']')[0]
+        repo_url = "https://github.com/" + repo_slug
+
+        # Check if the repo was deleted
+        if gh.check_repo_deleted(repo_url):
+            print(f"Repo {user}/{repo_name} has been deleted, closing issue {issue['title']}")
+            gh.close_issue(token, repo_slug, issue, "not_planned")
+            write_comment(token, repo_slug, issue, "Looks like the repository has been deleted or privated. Closing the issue.")
+            gh.add_label_to_issue(token, os.getenv('GITHUB_REPOSITORY'), issue['number'], "repo deleted")
+            continue
         
         if check == "A":
             follow_up_check_A(token, user, repo_name, issue)
@@ -40,7 +45,7 @@ def follow_up_issues(token, repo_slug):
         elif check == "C":
              follow_up_check_C(token, user, repo_name, issue)
         elif check == "D":
-             follow_up_check_C(token, user, repo_name, issue)
+             follow_up_check_D(token, user, repo_name, issue)
 
 
 def follow_up_check_A(token, user, repo_name, issue):
