@@ -239,3 +239,61 @@ def check_repo_deleted(repo_url):
         return True
     else:
         return False
+    
+# Check if there is a rule in the .gitattrubutes file that would cause .frm and .cls files to be checked-out as with LF instread of CRLF
+def gitattributes_misconfigured(repo_path=None):
+
+    # If the repo_path is empty, assume the current directory
+    if not repo_path:
+        repo_path = os.getcwd()
+
+    # Check if the .gitattributes file exists
+    git_attributes_path = os.path.join(repo_path, '.gitattributes')
+    
+    if not os.path.exists(git_attributes_path):
+        print("🔴 .gitattributes file not found")
+        return False
+    
+    # Check the EOL attribute for .frm and .cls files
+    try:
+        frm_eol_result = subprocess.run(
+            ["git", "check-attr", "eol", "*.frm"],
+            cwd=repo_path,
+            capture_output=True,
+            text=True
+        )
+        cls_eol_result = subprocess.run(
+            ["git", "check-attr", "eol", "*.cls"],
+            cwd=repo_path,
+            capture_output=True,
+            text=True
+        )
+        
+        # Parse the output to check if the EOL is set to LF
+        frm_not_crlf = "eol: lf" in frm_eol_result.stdout or "eol: unspecified" not in frm_eol_result.stdout
+        cls_not_crlf = "eol: lf" in cls_eol_result.stdout or "eol: unspecified" not in cls_eol_result.stdout
+
+        frm_text_result = subprocess.run(
+            ["git", "check-attr", "text", "*.frm"],
+            cwd=repo_path,
+            capture_output=True,
+            text=True
+        )
+        cls_text_result = subprocess.run(
+            ["git", "check-attr", "text", "*.cls"],
+            cwd=repo_path,
+            capture_output=True,
+            text=True
+        )
+
+        # Parse the output to check if the text attribute is set to auto
+        frm_text = "text: auto" in frm_text_result.stdout or "text: set" in frm_text_result.stdout
+        cls_text = "text: auto" in cls_text_result.stdout or "text: set" in cls_text_result.stdout
+
+        if (frm_text and frm_not_crlf) or (cls_text and cls_not_crlf):
+            return True
+        else:
+            return False
+    except Exception as e:
+        print(f"🔴 Error while checking .gitattributes: {e}")
+        return False

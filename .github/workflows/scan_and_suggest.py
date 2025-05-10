@@ -72,7 +72,7 @@ def read_template_file(template_path, replacements):
     
     return template_content
 
-def fix_file_extensions_issue(token, repo):
+def report_file_extensions_issue(token, repo):
     global all_issues
 
     try:
@@ -175,6 +175,21 @@ def main():
                 print(f"URL: {repo['html_url']}")
                 print(f"Updated at: {repo['updated_at']}")
                 
+                if repo['language'] == "VBA" or repo['language'] == "Visual Basic 6.0":
+                    print("")
+
+                    user = repo['owner']['login']
+                    if already_issue_for_user(user):
+                        print(f"🟡 Issue already exists for user: {user}")
+                        print('-' * 40)
+                        continue
+                        
+                    print(f"Performing checks")
+                    if gh.gitattributes_misconfigured():
+                        print("🔴 .gitattributes is misconfigured and won't handle line endings conversion properly.")
+                    else:
+                        print("🟢 .gitattributes is configured correctly.")
+
                 if repo['language'] == "Visual Basic .NET" or repo['language'] == "VBScript" or repo['language'] is None:
                     print("")
 
@@ -185,7 +200,7 @@ def main():
                         continue
                         
                     print(f"Performing checks")
-                    fix_file_extensions_issue(token, repo)
+                    report_file_extensions_issue(token, repo)
                         
                 print('-' * 40)
         else:
