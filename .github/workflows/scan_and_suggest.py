@@ -189,6 +189,8 @@ def main():
                     if gh.gitattributes_exists():
                         if gh.gitattributes_misconfigured():
                             print("🔴 .gitattributes is misconfigured and won't handle line endings conversion properly.")
+                            print("Creating issue...")
+                            create_issue_wrapper(token, repo, 'has a .gitattributes misconfiguration', 'Check E: .gitattributes is misconfigured.md', 'Check E')
                         else:
                             print("🟢 .gitattributes is configured correctly.")
                     else:
