@@ -239,7 +239,22 @@ def check_repo_deleted(repo_url):
         return True
     else:
         return False
+
+def gitattributes_exists(repo_path=None):
     
+    # If the repo_path is empty, assume the current directory
+    if not repo_path:
+        repo_path = os.getcwd()
+
+    # Check if the .gitattributes file exists
+    git_attributes_path = os.path.join(repo_path, '.gitattributes')
+    
+    if not os.path.exists(git_attributes_path):
+        return False
+    
+    # If it exists, return True
+    return True
+
 # Check if there is a rule in the .gitattrubutes file that would cause .frm and .cls files to be checked-out as with LF instread of CRLF
 def gitattributes_misconfigured(repo_path=None):
 
@@ -251,8 +266,9 @@ def gitattributes_misconfigured(repo_path=None):
     git_attributes_path = os.path.join(repo_path, '.gitattributes')
     
     if not os.path.exists(git_attributes_path):
-        print("🔴 .gitattributes file not found")
-        return False
+        # throw an error if the file does not exist
+        print("🔴 .gitattributes file does not exist")
+        raise ValueError("Problem while checking .gitattributes file.")
     
     # Check the EOL attribute for .frm and .cls files
     try:

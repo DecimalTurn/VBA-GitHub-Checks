@@ -185,10 +185,12 @@ def main():
                         continue
                         
                     print(f"Performing checks")
-                    if gh.gitattributes_misconfigured():
-                        print("🔴 .gitattributes is misconfigured and won't handle line endings conversion properly.")
-                    else:
-                        print("🟢 .gitattributes is configured correctly.")
+
+                    if gh.gitattributes_exists():
+                        if gh.gitattributes_misconfigured():
+                            print("🔴 .gitattributes is misconfigured and won't handle line endings conversion properly.")
+                        else:
+                            print("🟢 .gitattributes is configured correctly.")
 
                 if repo['language'] == "Visual Basic .NET" or repo['language'] == "VBScript" or repo['language'] is None:
                     print("")
