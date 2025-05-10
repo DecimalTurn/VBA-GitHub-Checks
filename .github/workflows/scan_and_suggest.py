@@ -191,6 +191,8 @@ def main():
                             print("🔴 .gitattributes is misconfigured and won't handle line endings conversion properly.")
                         else:
                             print("🟢 .gitattributes is configured correctly.")
+                    else:
+                        print("🟡 .gitattributes file is missing.")
 
                 if repo['language'] == "Visual Basic .NET" or repo['language'] == "VBScript" or repo['language'] is None:
                     print("")
