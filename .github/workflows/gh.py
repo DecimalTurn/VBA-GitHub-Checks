@@ -331,43 +331,57 @@ def gitattributes_misconfigured(repo_path):
     
     # Check the EOL attribute for .frm and .cls files
     try:
+        print(f"Checking EOL attribute for .frm files in {repo_path}")
         frm_eol_result = subprocess.run(
             ["git", "check-attr", "eol", "*.frm"],
             cwd=repo_path,
             capture_output=True,
             text=True
         )
+        print(f".frm eol result: {frm_eol_result.stdout.strip()}")
+
+        print(f"Checking EOL attribute for .cls files in {repo_path}")
         cls_eol_result = subprocess.run(
             ["git", "check-attr", "eol", "*.cls"],
             cwd=repo_path,
             capture_output=True,
             text=True
         )
+        print(f".cls eol result: {cls_eol_result.stdout.strip()}")
         
         # Parse the output to check if the EOL is set to LF
         frm_not_crlf = "eol: lf" in frm_eol_result.stdout or "eol: unspecified" not in frm_eol_result.stdout
         cls_not_crlf = "eol: lf" in cls_eol_result.stdout or "eol: unspecified" not in cls_eol_result.stdout
+        print(f".frm not CRLF: {frm_not_crlf}, .cls not CRLF: {cls_not_crlf}")
 
+        print(f"Checking text attribute for .frm files in {repo_path}")
         frm_text_result = subprocess.run(
             ["git", "check-attr", "text", "*.frm"],
             cwd=repo_path,
             capture_output=True,
             text=True
         )
+        print(f".frm text result: {frm_text_result.stdout.strip()}")
+
+        print(f"Checking text attribute for .cls files in {repo_path}")
         cls_text_result = subprocess.run(
             ["git", "check-attr", "text", "*.cls"],
             cwd=repo_path,
             capture_output=True,
             text=True
         )
+        print(f".cls text result: {cls_text_result.stdout.strip()}")
 
         # Parse the output to check if the text attribute is set to auto
         frm_text = "text: auto" in frm_text_result.stdout or "text: set" in frm_text_result.stdout
         cls_text = "text: auto" in cls_text_result.stdout or "text: set" in cls_text_result.stdout
+        print(f".frm text: {frm_text}, .cls text: {cls_text}")
 
         if (frm_text and frm_not_crlf) or (cls_text and cls_not_crlf):
+            print("gitattributes check result: True")
             return True
         else:
+            print("gitattributes check result: False")
             return False
     except Exception as e:
         print(f"🔴 Error while checking .gitattributes: {e}")
