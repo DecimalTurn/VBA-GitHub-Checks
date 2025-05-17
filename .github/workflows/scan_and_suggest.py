@@ -4,6 +4,7 @@ import subprocess
 import time
 # Custom modules
 import gh
+import utils
 
 all_issues_title = None
 
@@ -75,13 +76,10 @@ def read_template_file(template_path, replacements):
 def report_file_extensions_issue(token, repo):
     global all_issues
 
+    repo_name = utils.unique_folder(repo['owner']['login'], repo['name'])
+
     try:
-        # Clone the repo
-        try:
-            repo_name = gh.clone_repo(repo['html_url'], 'repos')
-        except Exception as e:
-            print(f"Error cloning the repo: {e}")
-            return
+
 
         repo_path = os.path.join('repos', repo_name)
 
@@ -152,7 +150,7 @@ def main():
 
     query = '(VBA OR VB6) NOT VBScript'
     # query = 'VBA in:name,description'
-    per_page = 100  # Number of repos to fetch per page
+    per_page = 20  # Number of repos to fetch per page
     total_pages = 1  # Number of pages to check
 
     for page in range(1, total_pages + 1):
@@ -166,26 +164,30 @@ def main():
         if repos:
             for repo in repos['items']:
 
-                if repo['language'] == 'VBA':
-                    continue
-
                 print(f"Name: {repo['name']}")
                 print(f"Description: {repo['description']}")
                 print(f"Language: {repo['language']}")
                 print(f"URL: {repo['html_url']}")
                 print(f"Updated at: {repo['updated_at']}")
                 
+                # Spam prevention
+                user = repo['owner']['login']
+                if already_issue_for_user(user):
+                    print(f"🟡 Issue already exists for user: {user}")
+                    print('-' * 40)
+                    continue
+
+                # Clone the repo
+                try:
+                    gh.clone_repo(repo['html_url'], 'repos')
+                except Exception as e:
+                    print(f"Error cloning the repo: {e}")
+                    return
+
                 if repo['language'] == "VBA" or repo['language'] == "Visual Basic 6.0":
                     print("")
 
-                    user = repo['owner']['login']
-                    if already_issue_for_user(user):
-                        print(f"🟡 Issue already exists for user: {user}")
-                        print('-' * 40)
-                        continue
-                        
-                    print(f"Performing checks")
-
+                    print(f"Performing .gitattributes checks")
                     if gh.gitattributes_exists():
                         if gh.gitattributes_misconfigured():
                             print("🔴 .gitattributes is misconfigured and won't handle line endings conversion properly.")
@@ -205,7 +207,7 @@ def main():
                         print('-' * 40)
                         continue
                         
-                    print(f"Performing checks")
+                    print(f"Performing file extension checks")
                     report_file_extensions_issue(token, repo)
                         
                 print('-' * 40)

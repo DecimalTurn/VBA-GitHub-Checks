@@ -3,6 +3,7 @@ import os
 import requests
 import subprocess
 import re
+import utils
 
 def get_all_issues_title(token, repo_slug):
     url = f"https://api.github.com/repos/{repo_slug}/issues"
@@ -172,13 +173,13 @@ def clone_repo(repo_url, destination_folder):
     if not os.path.exists(destination_folder):
         os.makedirs(destination_folder)
     
-    repo_name =  repo_url.split('/')[-2] + " --- " + repo_url.split('/')[-1]
+    repo_name =  utils.unique_folder(repo_url.split('/')[-2], repo_url.split('/')[-1])
     repo_path = os.path.join(destination_folder, repo_name)
     
     if not os.path.exists(repo_path):
         print(f"Cloning {repo_url} into {repo_path}")
         subprocess.run(["git", "clone", "--depth", "1", repo_url, repo_path])
-        return repo_name
+        return True
     else:
         print(f"Repository {repo_name} already exists in {destination_folder}.")
         raise ValueError("Problem with cloning.")
