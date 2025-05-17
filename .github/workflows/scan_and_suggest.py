@@ -37,32 +37,6 @@ def search_github_repos(query, sort='updated', order='desc', per_page=10, page=1
         print(f"Failed to fetch data from GitHub API. Status code: {response.status_code}")
         return None
 
-
-def create_github_issue(token, this_repo_slug, title, body, labels=None):
-    url = f"https://api.github.com/repos/{this_repo_slug}/issues"
-    headers = {
-        'Accept': 'application/vnd.github.v3+json',
-        'Authorization': f'token {token}'
-    }
-    data = {
-        'title': title,
-        'body': body,
-        'labels': labels if labels else []  # Use the provided labels or an empty list if none are given
-    }
-    
-    print(f"URL: {url}")
-    print(f"Headers: {headers}")
-    print(f"Data: {data}")
-
-    response = requests.post(url, headers=headers, json=data)
-    
-    if response.status_code == 201:
-        print(f"🟢 Issue created successfully: {response.json()['html_url']}")
-        return response.json()['number']
-    else:
-        print(f"🔴 Failed to create issue. Status code: {response.status_code}")
-        print(response.json())
-
 def read_template_file(template_path, replacements):
     with open(template_path, 'r') as file:
         template_content = file.read()
@@ -127,7 +101,7 @@ def create_issue_wrapper(token, repo, issue_title_suffix, template_name, label_n
             return
 
         try:
-            issue_number = create_github_issue(token, os.getenv('GITHUB_REPOSITORY'), issue_title, issue_body, ["external", label_name])
+            issue_number = gh.create_github_issue(token, os.getenv('GITHUB_REPOSITORY'), issue_title, issue_body, ["external", label_name])
         except Exception as e:
             print(f"🔴 Error creating GitHub issue: {e}")
             return
@@ -183,6 +157,10 @@ def main():
                 except Exception as e:
                     print(f"Error cloning the repo: {e}")
                     return
+                
+                #TODO : 
+                # Store the commit hash of the last commit, the scan_date and the outcome of the scan to be saved in an issue
+                # Save the information at the end in the issue_for_scanned_repo (see gh.py)
 
                 if repo['language'] == "VBA" or repo['language'] == "Visual Basic 6.0":
                     print("")
