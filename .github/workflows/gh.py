@@ -372,8 +372,8 @@ def gitattributes_misconfigured(repo_path):
         print(f".cls eol result: {cls_eol_result.stdout.strip()}")
         
         # Parse the output to check if the EOL is set to LF
-        frm_not_crlf = "eol: lf" in frm_eol_result.stdout or "eol: unspecified" not in frm_eol_result.stdout
-        cls_not_crlf = "eol: lf" in cls_eol_result.stdout or "eol: unspecified" not in cls_eol_result.stdout
+        frm_not_crlf = "eol: lf" in frm_eol_result.stdout or "eol: unspecified" in frm_eol_result.stdout
+        cls_not_crlf = "eol: lf" in cls_eol_result.stdout or "eol: unspecified" in cls_eol_result.stdout
         print(f".frm not CRLF: {frm_not_crlf}, .cls not CRLF: {cls_not_crlf}")
 
         print(f"Checking text attribute for .frm files in {repo_path}")
