@@ -124,7 +124,7 @@ def main():
 
     query = '(VBA OR VB6) NOT VBScript'
     # query = 'VBA in:name,description'
-    per_page = 50  # Number of repos to fetch per page
+    per_page = 25  # Number of repos to fetch per page
     total_pages = 1  # Number of pages to check
 
     for page in range(1, total_pages + 1):
@@ -166,8 +166,11 @@ def main():
                     print("")
 
                     print(f"Performing .gitattributes checks")
-                    if gh.gitattributes_exists():
-                        if gh.gitattributes_misconfigured():
+                    repo_path = os.path.join('repos', utils.unique_folder(repo['owner']['login'], repo['name']))
+                    print(f"Checking .gitattributes in {repo_path}")
+
+                    if gh.gitattributes_exists(repo_path):
+                        if gh.gitattributes_misconfigured(repo_path):
                             print("🔴 .gitattributes is misconfigured and won't handle line endings conversion properly.")
                             print("Creating issue...")
                             create_issue_wrapper(token, repo, 'has a .gitattributes misconfiguration', 'Check E: .gitattributes is misconfigured.md', 'Check E')
@@ -178,12 +181,6 @@ def main():
 
                 if repo['language'] == "Visual Basic .NET" or repo['language'] == "VBScript" or repo['language'] is None:
                     print("")
-
-                    user = repo['owner']['login']
-                    if already_issue_for_user(user):
-                        print(f"🟡 Issue already exists for user: {user}")
-                        print('-' * 40)
-                        continue
                         
                     print(f"Performing file extension checks")
                     report_file_extensions_issue(token, repo)

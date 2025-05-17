@@ -303,12 +303,8 @@ def check_repo_deleted(repo_url):
     else:
         return False
 
-def gitattributes_exists(repo_path=None):
+def gitattributes_exists(repo_path):
     
-    # If the repo_path is empty, assume the current directory
-    if not repo_path:
-        repo_path = os.getcwd()
-
     # Check if the .gitattributes file exists
     git_attributes_path = os.path.join(repo_path, '.gitattributes')
     
@@ -319,7 +315,7 @@ def gitattributes_exists(repo_path=None):
     return True
 
 # Check if there is a rule in the .gitattrubutes file that would cause .frm and .cls files to be checked-out as with LF instread of CRLF
-def gitattributes_misconfigured(repo_path=None):
+def gitattributes_misconfigured(repo_path):
 
     # If the repo_path is empty, assume the current directory
     if not repo_path:
