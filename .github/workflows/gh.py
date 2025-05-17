@@ -329,6 +329,28 @@ def gitattributes_misconfigured(repo_path):
         print("🔴 .gitattributes file does not exist")
         raise ValueError("Problem while checking .gitattributes file.")
     
+    # Print the output of git ls-files --eol for .frm and .cls files
+    try:
+        print(f"Running 'git ls-files --eol *.frm' in {repo_path}")
+        frm_ls_eol = subprocess.run(
+            ["git", "ls-files", "--eol", "*.frm"],
+            cwd=repo_path,
+            capture_output=True,
+            text=True
+        )
+        print(f"Output of 'git ls-files --eol *.frm':\n{frm_ls_eol.stdout.strip()}")
+
+        print(f"Running 'git ls-files --eol *.cls' in {repo_path}")
+        cls_ls_eol = subprocess.run(
+            ["git", "ls-files", "--eol", "*.cls"],
+            cwd=repo_path,
+            capture_output=True,
+            text=True
+        )
+        print(f"Output of 'git ls-files --eol *.cls':\n{cls_ls_eol.stdout.strip()}")
+    except Exception as e:
+        print(f"🔴 Error running 'git ls-files --eol': {e}")
+
     # Check the EOL attribute for .frm and .cls files
     try:
         print(f"Checking EOL attribute for .frm files in {repo_path}")
