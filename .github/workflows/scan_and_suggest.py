@@ -150,7 +150,7 @@ def main():
 
     query = '(VBA OR VB6) NOT VBScript'
     # query = 'VBA in:name,description'
-    per_page = 20  # Number of repos to fetch per page
+    per_page = 50  # Number of repos to fetch per page
     total_pages = 1  # Number of pages to check
 
     for page in range(1, total_pages + 1):
