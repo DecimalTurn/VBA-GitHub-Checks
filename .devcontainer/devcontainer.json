@@ -9,7 +9,8 @@
 			"extensions": [
 				"ms-python.python",
 				"GitHub.copilot-chat",
-				"GitHub.copilot"
+				"GitHub.copilot",
+				"GitHub.vscode-github-actions"
 			]
 		}
 	}
