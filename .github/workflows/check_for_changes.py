@@ -232,6 +232,35 @@ def follow_up_check_D(token, user, repo_name, issue):
     if comment:
         write_comment(token, main_repo_slug, issue, comment)
 
+def follow_up_check_E(token, user, repo_name, issue):
+
+    issue_number = issue['number']
+    main_repo_slug = os.getenv('GITHUB_REPOSITORY')
+
+    # Get the information on the repo
+    repo_info = get_repo_info(token, user, repo_name)
+    if not repo_info:
+        print(f"Failed to get repo info for issue: {issue['title']}")
+        return
+
+    counts = get_counts(token, user, repo_name)
+    if not counts:
+        print(f"Failed to get counts for issue: {issue['title']}")
+        return
+
+    comment = ""
+
+    # Part specific to Check E
+    if not gh.gitattributes_misconfigured(token, user, repo_name):
+        comment = "Looks like you made some changes and the .gitattributes file is now correctly configured." + "\n"
+        comment += "This issue is now resolved, so I'm closing it. If you have any questions, feel free to ask." + "\n"
+        gh.close_issue(token, main_repo_slug, issue, "completed")
+        handle_labels_after_completion(token, main_repo_slug, issue_number)
+        return
+
+    if comment:
+        write_comment(token, main_repo_slug, issue, comment)
+
 # This function looks inside the gitattributes file of the repository to check if the they added a rule to 
 # consider the extension as VBA via the linguist-language override
 def check_gitattributes(token, user, repo_name, ext):
