@@ -315,7 +315,7 @@ def gitattributes_exists(repo_path):
     return True
 
 # Check if there is a rule in the .gitattrubutes file that would cause .frm and .cls files to be checked-out as with LF instread of CRLF
-def gitattributes_misconfigured(repo_path):
+def gitattributes_misconfigured(repo_path, counts):
 
     # If the repo_path is empty, assume the current directory
     if not repo_path:
@@ -399,7 +399,12 @@ def gitattributes_misconfigured(repo_path):
         cls_text = "text: auto" in cls_text_result.stdout or "text: set" in cls_text_result.stdout
         print(f".frm text: {frm_text}, .cls text: {cls_text}")
 
-        if (frm_text and frm_not_crlf) or (cls_text and cls_not_crlf):
+        # Check if the repo contains .frm and .cls files using the counts 
+        frm_count = counts[".frm"]
+        cls_count = counts[".cls"]
+        print(f"Number of .frm files: {frm_count}, Number of .cls files: {cls_count}")
+
+        if (frm_text and frm_not_crlf and frm_count > 0) or (cls_text and cls_not_crlf and cls_count > 0):
             print("gitattributes check result: True")
             return True
         else:

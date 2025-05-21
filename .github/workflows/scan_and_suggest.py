@@ -47,22 +47,10 @@ def read_template_file(template_path, replacements):
     
     return template_content
 
-def report_file_extensions_issue(token, repo):
+def report_file_extensions_issue(token, repo, counts):
     global all_issues
 
-    repo_name = utils.unique_folder(repo['owner']['login'], repo['name'])
-
     try:
-
-
-        repo_path = os.path.join('repos', repo_name)
-
-        try:
-            counts = gh.count_vba_related_files(repo_path)
-        except Exception as e:
-            print(f"🔴 Error counting VBA-related files: {e}")
-            return
-
         if repo['language'] == "Visual Basic .NET" and counts[".vb"] > 0 and counts[".vbproj"] == 0 and counts[".d.vb"] == 0 and counts[".bas"] == 0:       
             # VB.NET extension used for VBA code
             create_issue_wrapper(token, repo, 'is detected as Visual Basic .NET', 'Check A: Use of vb extension.md', 'Check A')
@@ -162,15 +150,22 @@ def main():
                 # Store the commit hash of the last commit, the scan_date and the outcome of the scan to be saved in an issue
                 # Save the information at the end in the issue_for_scanned_repo (see gh.py)
 
+                repo_path = os.path.join('repos', utils.unique_folder(repo['owner']['login'], repo['name']))
+                try:
+                    counts = gh.count_vba_related_files(repo_path)
+                except Exception as e:
+                    print(f"🔴 Error counting VBA-related files: {e}")
+                    return
+
                 if repo['language'] == "VBA" or repo['language'] == "Visual Basic 6.0":
                     print("")
 
                     print(f"Performing .gitattributes checks")
-                    repo_path = os.path.join('repos', utils.unique_folder(repo['owner']['login'], repo['name']))
+                    
                     print(f"Checking .gitattributes in {repo_path}")
 
                     if gh.gitattributes_exists(repo_path):
-                        if gh.gitattributes_misconfigured(repo_path):
+                        if gh.gitattributes_misconfigured(repo_path, counts):
                             print("🔴 .gitattributes is misconfigured and won't handle line endings conversion properly.")
                             print("Creating issue...")
                             create_issue_wrapper(token, repo, 'has a .gitattributes misconfiguration', 'Check E: .gitattributes is misconfigured.md', 'Check E')
@@ -183,7 +178,7 @@ def main():
                     print("")
                         
                     print(f"Performing file extension checks")
-                    report_file_extensions_issue(token, repo)
+                    report_file_extensions_issue(token, repo, counts)
                         
                 print('-' * 40)
         else:
