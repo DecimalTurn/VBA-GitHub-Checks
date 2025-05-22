@@ -10,6 +10,7 @@ import re
 
 # Custom modules
 import gh
+import utils
 
 all_open_issues = None
 
@@ -305,13 +306,18 @@ def get_counts(token, user, repo_name):
     # Clone the repo
     html_url = f"https://github.com/{user}/{repo_name}"
     try:
-        gh.clone_repo(html_url, 'repos')
+        gh.clone_repo(html_url)
     except Exception as e:
         print(f"Error cloning the repo: {e}")
         return
 
-    # Count the number of .vb files in the repo
-    repo_path = os.path.join('repos', repo_name)
+    # Count the number of files in the repo
+
+    repo_path = utils.repo_path(user, repo_name)
+    if not os.path.exists(repo_path):
+        print(f"🔴 Error: Repository path {repo_path} does not exist.")
+        return
+    
     try:
         return gh.count_vba_related_files(repo_path)
     except Exception as e:

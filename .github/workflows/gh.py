@@ -226,24 +226,24 @@ def close_issue(token, repo_slug, issue, reason):
     else:
         print(f"Failed to get issue number for issue: {issue['title']}")
 
-def clone_repo(repo_url, destination_folder):
+def clone_repo(repo_url):
 
     if repo_url == "":
         print("🔴 Repo URL was empty")
         raise ValueError("URL can't be empty.")
 
-    if not os.path.exists(destination_folder):
-        os.makedirs(destination_folder)
+    if not os.path.exists(utils.subfolder_name()):
+        os.makedirs(utils.subfolder_name())
     
-    repo_name =  utils.unique_folder(repo_url.split('/')[-2], repo_url.split('/')[-1])
-    repo_path = os.path.join(destination_folder, repo_name)
+    repo_slug =  utils.unique_folder(repo_url.split('/')[-2], repo_url.split('/')[-1])
+    repo_path = os.path.join(utils.subfolder_name(), repo_slug)
     
     if not os.path.exists(repo_path):
         print(f"Cloning {repo_url} into {repo_path}")
         subprocess.run(["git", "clone", "--depth", "1", repo_url, repo_path])
         return True
     else:
-        print(f"Repository {repo_name} already exists in {destination_folder}.")
+        print(f"Repository {repo_slug} already exists in {utils.subfolder_name}.")
         raise ValueError("Problem with cloning.")
     
 def count_vba_related_files(repo_path):

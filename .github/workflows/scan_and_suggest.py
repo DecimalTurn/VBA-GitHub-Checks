@@ -141,7 +141,7 @@ def main():
 
                 # Clone the repo
                 try:
-                    gh.clone_repo(repo['html_url'], 'repos')
+                    gh.clone_repo(repo['html_url'])
                 except Exception as e:
                     print(f"Error cloning the repo: {e}")
                     return
