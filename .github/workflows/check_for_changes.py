@@ -305,7 +305,7 @@ def get_counts(token, user, repo_name):
     # Clone the repo
     html_url = f"https://github.com/{user}/{repo_name}"
     try:
-        repo_name = gh.clone_repo(html_url, 'repos')
+        gh.clone_repo(html_url, 'repos')
     except Exception as e:
         print(f"Error cloning the repo: {e}")
         return

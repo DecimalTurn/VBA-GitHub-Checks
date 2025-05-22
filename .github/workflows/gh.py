@@ -230,7 +230,7 @@ def clone_repo(repo_url, destination_folder):
 
     if repo_url == "":
         print("🔴 Repo URL was empty")
-        return
+        raise ValueError("URL can't be empty.")
 
     if not os.path.exists(destination_folder):
         os.makedirs(destination_folder)
