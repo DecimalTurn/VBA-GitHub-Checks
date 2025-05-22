@@ -150,7 +150,7 @@ def main():
                 # Store the commit hash of the last commit, the scan_date and the outcome of the scan to be saved in an issue
                 # Save the information at the end in the issue_for_scanned_repo (see gh.py)
 
-                repo_path = os.path.join('repos', utils.unique_folder(repo['owner']['login'], repo['name']))
+                repo_path = utils.repo_path(repo['owner']['login'], repo['name'])
                 try:
                     counts = gh.count_vba_related_files(repo_path)
                 except Exception as e:

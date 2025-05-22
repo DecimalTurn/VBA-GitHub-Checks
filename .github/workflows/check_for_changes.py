@@ -266,7 +266,7 @@ def follow_up_check_E(token, user, repo_name, issue):
 # consider the extension as VBA via the linguist-language override
 def check_gitattributes(token, user, repo_name, ext):
     # The repo should already be cloned at this stage, so we look directly in the gitattributes file
-    repo_path = os.path.join('repos', repo_name)
+    repo_path = utils.repo_path(user, repo_name)
     gitattributes_path = os.path.join(repo_path, '.gitattributes')
     if not os.path.exists(gitattributes_path):
         return False
