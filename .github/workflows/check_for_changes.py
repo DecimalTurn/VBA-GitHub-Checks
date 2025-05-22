@@ -84,6 +84,7 @@ def follow_up_check_A(token, repo_info, user, repo_name, issue):
         else:
             if not subCheck:
                 comment += "However, there are still files with the .vb extension. Is this intentional? [SubCheck AA]" + "\n"               
+                gh.add_label_to_issue(token, main_repo_slug, issue_number, "partially completed")
         
     else:
 
@@ -125,6 +126,7 @@ def follow_up_check_B(token, repo_info, user, repo_name, issue):
         else:
             if not subCheck:
                 comment += "However, there are still files with the .vbs extension. Is this intentional? [SubCheck BA]" + "\n"               
+                gh.add_label_to_issue(token, main_repo_slug, issue_number, "partially completed")
         
     else:
 
@@ -162,6 +164,7 @@ def follow_up_check_C(token, repo_info, user, repo_name, issue):
         else:
             if not subCheck:
                 comment += "However, there are still files with no extension that contain VBA code. Is this intentional? [SubCheck CA]" + "\n"   
+                gh.add_label_to_issue(token, main_repo_slug, issue_number, "partially completed")
            
     else:
 
@@ -203,6 +206,7 @@ def follow_up_check_D(token, repo_info, user, repo_name, issue):
         else:
             if not subCheck:
                 comment += "However, there are still files with the .txt extension that contain VBA code. Is this intentional? [SubCheck DA]" + "\n"   
+                gh.add_label_to_issue(token, main_repo_slug, issue_number, "partially completed")
            
     else:
 
@@ -255,7 +259,8 @@ def check_gitattributes(token, user, repo_name, ext):
 
 def handle_labels_after_completion(token, main_repo_slug, issue_number):
     gh.add_label_to_issue(token, main_repo_slug, issue_number, "completed")
-    gh.remove_label_from_issue(token, main_repo_slug, issue_number, "stale")  
+    gh.remove_label_from_issue(token, main_repo_slug, issue_number, "stale") 
+    gh.remove_label_from_issue(token, main_repo_slug, issue_number, "partially completed") 
 
 def get_repo_info(token, user, repo_name):
     url = f"https://api.github.com/repos/{user}/{repo_name}"
