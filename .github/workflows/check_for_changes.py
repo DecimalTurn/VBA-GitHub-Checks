@@ -31,8 +31,13 @@ def follow_up_issues(token, repo_slug):
         repo_name = issue['title'].split('/')[1].split(']')[0]
         repo_url = "https://github.com/" + repo_slug
 
-        # Check if the repo was deleted
-        if gh.check_repo_deleted(repo_url):
+        repo_info = get_repo_info(token, user, repo_name)
+        if not repo_info:
+            print(f"Failed to get repo info for issue: {issue['title']}")
+            continue
+
+        # Check if the repo was deleted or privated
+        if repo_info['status_code'] == 404:
             print(f"Repo {user}/{repo_name} has been deleted, closing issue {issue['title']}")
             gh.close_issue(token, repo_slug, issue, "not_planned")
             write_comment(token, repo_slug, issue, "Looks like the repository has been deleted or privated. Closing the issue.")
@@ -40,25 +45,19 @@ def follow_up_issues(token, repo_slug):
             continue
         
         if check == "A":
-            follow_up_check_A(token, user, repo_name, issue)
+            follow_up_check_A(token, repo_info, user, repo_name, issue)
         elif check == "B":
-             follow_up_check_B(token, user, repo_name, issue)
+             follow_up_check_B(token, repo_info, user, repo_name, issue)
         elif check == "C":
-             follow_up_check_C(token, user, repo_name, issue)
+             follow_up_check_C(token, repo_info, user, repo_name, issue)
         elif check == "D":
-             follow_up_check_D(token, user, repo_name, issue)
+             follow_up_check_D(token, repo_info, user, repo_name, issue)
 
 
-def follow_up_check_A(token, user, repo_name, issue):
+def follow_up_check_A(token, repo_info, user, repo_name, issue):
 
     issue_number = issue['number']
     main_repo_slug = os.getenv('GITHUB_REPOSITORY')
-
-    # Get the information on the repo
-    repo_info = get_repo_info(token, user, repo_name)
-    if not repo_info:
-        print(f"Failed to get repo info for issue: {issue['title']}")
-        return
 
     counts = get_counts(token, user, repo_name)
     if not counts:
@@ -96,16 +95,10 @@ def follow_up_check_A(token, user, repo_name, issue):
     if comment:
         write_comment(token, main_repo_slug, issue, comment)
 
-def follow_up_check_B(token, user, repo_name, issue):
+def follow_up_check_B(token, repo_info, user, repo_name, issue):
 
     issue_number = issue['number']
     main_repo_slug = os.getenv('GITHUB_REPOSITORY')
-
-    # Get the information on the repo
-    repo_info = get_repo_info(token, user, repo_name)
-    if not repo_info:
-        print(f"Failed to get repo info for issue: {issue['title']}")
-        return
 
     counts = get_counts(token, user, repo_name)
     if not counts:
@@ -143,16 +136,10 @@ def follow_up_check_B(token, user, repo_name, issue):
     if comment:
         write_comment(token, main_repo_slug, issue, comment)
 
-def follow_up_check_C(token, user, repo_name, issue):
+def follow_up_check_C(token, repo_info, user, repo_name, issue):
 
     issue_number = issue['number']
     main_repo_slug = os.getenv('GITHUB_REPOSITORY')
-
-    # Get the information on the repo
-    repo_info = get_repo_info(token, user, repo_name)
-    if not repo_info:
-        print(f"Failed to get repo info for issue: {issue['title']}")
-        return
 
     counts = get_counts(token, user, repo_name)
     if not counts:
@@ -186,16 +173,10 @@ def follow_up_check_C(token, user, repo_name, issue):
     if comment:
         write_comment(token, main_repo_slug, issue, comment)
 
-def follow_up_check_D(token, user, repo_name, issue):
+def follow_up_check_D(token, repo_info, user, repo_name, issue):
 
     issue_number = issue['number']
     main_repo_slug = os.getenv('GITHUB_REPOSITORY')
-
-    # Get the information on the repo
-    repo_info = get_repo_info(token, user, repo_name)
-    if not repo_info:
-        print(f"Failed to get repo info for issue: {issue['title']}")
-        return
 
     counts = get_counts(token, user, repo_name)
     if not counts:
@@ -233,16 +214,10 @@ def follow_up_check_D(token, user, repo_name, issue):
     if comment:
         write_comment(token, main_repo_slug, issue, comment)
 
-def follow_up_check_E(token, user, repo_name, issue):
+def follow_up_check_E(token, repo_info, user, repo_name, issue):
 
     issue_number = issue['number']
     main_repo_slug = os.getenv('GITHUB_REPOSITORY')
-
-    # Get the information on the repo
-    repo_info = get_repo_info(token, user, repo_name)
-    if not repo_info:
-        print(f"Failed to get repo info for issue: {issue['title']}")
-        return
 
     counts = get_counts(token, user, repo_name)
     if not counts:
@@ -293,7 +268,12 @@ def get_repo_info(token, user, repo_name):
     
     if response.status_code == 200:
         repo_info = response.json()
+        # Add a status code to the repo_info
+        repo_info['status_code'] = response.status_code
         return repo_info
+    elif response.status_code == 404:
+        # Return a minimal repo_info indicating not found
+        return {'status_code': 404, 'full_name': f"{user}/{repo_name}"}
     else:
         print(f"Failed to fetch repo info for {user}/{repo_name}. Status code: {response.status_code}")
         return None
