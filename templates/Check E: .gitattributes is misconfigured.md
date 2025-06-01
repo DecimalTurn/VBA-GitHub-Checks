@@ -16,14 +16,14 @@ Step 1: Add this to your `.gitattributes`
 ```
 
 Step 2: Restore CRLF the line endings in the Git index.
-To do that, you can do a git add + commit like this:
+To do that, you can do a git add + commit like this (Option A):
 
 ```bash
 git add . --renormalize
 git commit -m "Restore line endings"
 ```
 
-Or you could also use [Enforce-CRLF](https://github.com/DecimalTurn/Enforce-CRLF) which will prevent LF from being introduced by mistake in the future.
+Or you could also use [Enforce-CRLF](https://github.com/DecimalTurn/Enforce-CRLF) which will prevent LF from being introduced by mistake in the future (Option B).
 
 For more information on how to configure your .gitattributes file and why you don't want to set the `text` property for VBA files, you can have a look at https://github.com/DecimalTurn/VBA-on-GitHub.
 
