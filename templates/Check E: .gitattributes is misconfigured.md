@@ -4,7 +4,30 @@ It seems like there is a small issue with your repo named [%{reponame}%](%{url}%
 
 Currently, the .gitattributes file is misconfigured and there is a risk that if people try to clone or download your repo as a .zip file, they will get an error due to line endings in .cls or .frm files.
 
-For more information on how to configure your .gitattributes file, you can have a look at https://github.com/DecimalTurn/VBA-on-GitHub.
+Here's a simple solution:
+
+Step 1: Add this to your `.gitattributes`
+
+```gitattributes
+# VBA extensions: Prevent LF normalization
+*.bas  -text
+*.cls  -text
+*.frm  -text
+```
+
+Step 2: Restore CRLF the line endings in the Git index.
+To do that, you can do a git add + commit like this:
+
+```bash
+git add . --renormalize
+git commit -m "Restore line endings"
+```
+
+Or you could also use [Enforce-CRLF](https://github.com/DecimalTurn/Enforce-CRLF) which will prevent LF from being introduced by mistake in the future.
+
+For more information on how to configure your .gitattributes file and why you don't want to set the `text` property for VBA files, you can have a look at https://github.com/DecimalTurn/VBA-on-GitHub.
+
+And if you have any questions, feel free to ask it here and a real human will answer you.
 
 <hr>
 
