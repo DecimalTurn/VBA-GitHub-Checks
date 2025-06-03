@@ -252,7 +252,6 @@ def follow_up_check_E(token, repo_info, user, repo_name, issue):
         )
         gh.close_issue(token, main_repo_slug, issue, "completed")
         handle_labels_after_completion(token, main_repo_slug, issue_number)
-        return
 
     if comment:
         write_comment(token, main_repo_slug, issue, comment)
