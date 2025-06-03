@@ -224,6 +224,7 @@ def follow_up_check_E(token, repo_info, user, repo_name, issue):
 
     issue_number = issue['number']
     main_repo_slug = os.getenv('GITHUB_REPOSITORY')
+    repo_path = utils.repo_path(repo_info['owner']['login'], repo_info['name'])
 
     counts = get_counts(token, user, repo_name)
     if not counts:
@@ -234,7 +235,7 @@ def follow_up_check_E(token, repo_info, user, repo_name, issue):
 
     # Part specific to Check E
     try:
-        misconfigured = gh.gitattributes_misconfigured(token, user, repo_name)
+        misconfigured = gh.gitattributes_misconfigured(repo_path, counts)
     except Exception as e:
         # Handle the error (logging, commenting, or reporting)
         error_message = (
