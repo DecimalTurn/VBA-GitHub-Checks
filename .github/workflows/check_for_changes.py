@@ -233,9 +233,22 @@ def follow_up_check_E(token, repo_info, user, repo_name, issue):
     comment = ""
 
     # Part specific to Check E
-    if not gh.gitattributes_misconfigured(token, user, repo_name):
-        comment = "Looks like you made some changes and the .gitattributes file is now correctly configured." + "\n"
-        comment += "This issue is now resolved, so I'm closing it. If you have any questions, feel free to ask." + "\n"
+    try:
+        misconfigured = gh.gitattributes_misconfigured(token, user, repo_name)
+    except Exception as e:
+        # Handle the error (logging, commenting, or reporting)
+        error_message = (
+            f"Error while checking .gitattributes configuration: {e}"
+        )
+        # You might want to notify via comment or log
+        print(error_message)
+        raise
+
+    if not misconfigured:
+        comment = (
+            "Looks like you made some changes and the .gitattributes file is now correctly configured.\n"
+            "This issue is now resolved, so I'm closing it. If you have any questions, feel free to ask.\n"
+        )
         gh.close_issue(token, main_repo_slug, issue, "completed")
         handle_labels_after_completion(token, main_repo_slug, issue_number)
         return
