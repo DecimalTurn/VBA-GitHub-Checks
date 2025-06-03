@@ -52,6 +52,8 @@ def follow_up_issues(token, repo_slug):
              follow_up_check_C(token, repo_info, user, repo_name, issue)
         elif check == "D":
              follow_up_check_D(token, repo_info, user, repo_name, issue)
+        elif check == "E":
+             follow_up_check_E(token, repo_info, user, repo_name, issue)
 
 
 def follow_up_check_A(token, repo_info, user, repo_name, issue):
