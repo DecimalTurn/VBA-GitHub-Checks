@@ -155,7 +155,7 @@ def main():
                     counts = gh.count_vba_related_files(repo_path)
                 except Exception as e:
                     print(f"🔴 Error counting VBA-related files: {e}")
-                    return
+                    continue
 
                 if repo['language'] == "VBA" or repo['language'] == "Visual Basic 6.0":
                     print("")
