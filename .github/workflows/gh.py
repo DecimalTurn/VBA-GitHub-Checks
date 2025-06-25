@@ -254,7 +254,13 @@ def count_vba_related_files(repo_path):
         # Remove the '.git' directory from the list of directories to avoid descending into it
         dirs[:] = [d for d in dirs if d != '.git']
         for file in files:
+
             file_path = os.path.join(root, file)
+
+            # Skip symbolic links
+            if os.path.islink(file_path):
+                continue
+            
             for ext in vba_extensions:
                 if ext == ".txt" or ext == ".vbs":
                     if file.endswith(ext) and is_vba_file(file_path):
