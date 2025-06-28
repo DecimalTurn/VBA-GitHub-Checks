@@ -110,7 +110,7 @@ def main():
     token = os.getenv('GITHUB_TOKEN')
     all_issues_title = gh.get_all_issues_title(token, os.getenv('GITHUB_REPOSITORY'))
 
-    query = '(VBA OR VB6) NOT VBScript'
+    query = 'VBA NOT VBScript'
     # query = 'VBA in:name,description'
     per_page = 50  # Number of repos to fetch per page (max: 100)
     total_pages = 1  # Number of pages to check
