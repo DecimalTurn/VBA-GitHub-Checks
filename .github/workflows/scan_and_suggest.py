@@ -18,7 +18,7 @@ def already_issue_for_user(user):
     return False
 
 
-def search_github_repos(query, sort='updated', order='desc', per_page=40, page=1):
+def search_github_repos(query, sort='updated', order='desc', per_page=60, page=1):
     url = f"https://api.github.com/search/repositories"
     headers = {'Accept': 'application/vnd.github.v3+json'}
     params = {
