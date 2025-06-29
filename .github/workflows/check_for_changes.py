@@ -245,6 +245,41 @@ def follow_up_check_E(token, repo_info, user, repo_name, issue):
         print(error_message)
         raise
 
+    try:
+        import git_ls_parser
+        git_ls_output = gh.get_git_ls_files_output(repo_path)
+        parsed_data = git_ls_parser.parse_git_ls_files_output(git_ls_output)
+
+        # Check if there are still .frm and .cls files with LF line endings in the working directory
+        frm_files_with_lf = [
+            path for path, info in parsed_data.items()
+            if info.working_directory == 'lf' and path.endswith('.frm')
+        ]
+
+        cls_files_with_lf = [
+            path for path, info in parsed_data.items()
+            if info.working_directory == 'lf' and path.endswith('.cls')
+        ]
+
+        if frm_files_with_lf or cls_files_with_lf:
+            wrong_eol_files = True
+            number_of_wrong_eol_files = len(frm_files_with_lf) + len(cls_files_with_lf)
+            # Print list of all .frm and .cls files with LF line endings
+            print("Files with LF line endings in the working directory:")
+            for path in frm_files_with_lf:
+                print(f" - {path}")
+            for path in cls_files_with_lf:
+                print(f" - {path}")
+
+    except Exception as e:
+        # Handle the error (logging, commenting, or reporting)
+        error_message = (
+            f"Error while parsing git ls-files output: {e}"
+        )
+        # You might want to notify via comment or log
+        print(error_message)
+
+
     if not misconfigured:
         comment = (
             "Looks like you made some changes and the .gitattributes file is now correctly configured.\n"
