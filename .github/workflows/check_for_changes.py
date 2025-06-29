@@ -235,8 +235,8 @@ def follow_up_check_E(token, repo_info, user, repo_name, issue):
     subCheck = False
     wrong_eol_files = False
     number_of_wrong_eol_files = 0
-    frm_files_with_lf = []
-    cls_files_with_lf = []
+    frm_files_with_lf_in_working_directory = []
+    cls_files_with_lf_in_working_directory = []
 
     # Part specific to Check E
     try:
@@ -251,9 +251,12 @@ def follow_up_check_E(token, repo_info, user, repo_name, issue):
     try:
         import git_ls_parser
         git_ls_output = gh.get_git_ls_files_output(repo_path)
+        print("git ls-files output: \n" + git_ls_output)
         parsed_data = git_ls_parser.parse_git_ls_files_output(git_ls_output)
 
         print("Parsed git ls-files output:")
+        if not parsed_data:
+            print("No parsed data found.")
         for path, info in parsed_data.items():
             print(f"Path: {path}, Index: {info.index}, Working Directory: {info.working_directory}, Attribute: {info.attribute_text} {info.attribute_eol}")
         
@@ -279,7 +282,7 @@ def follow_up_check_E(token, repo_info, user, repo_name, issue):
             print("Files with LF line endings in the working directory:")
             for path in frm_files_with_lf_in_working_directory:
                 print(f" - {path}")
-            for path in cls_files_with_lf:
+            for path in cls_files_with_lf_in_working_directory:
                 print(f" - {path}")
         else:
             print("No frm/cls files with LF line endings found in the working directory.")
