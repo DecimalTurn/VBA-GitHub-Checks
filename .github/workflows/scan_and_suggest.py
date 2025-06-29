@@ -197,13 +197,13 @@ def main():
                             else:
                                 print("No .frm files with LF in working directory found.")
 
-                            cls_files_with_crlf_in_working_directory = [fname for fname, info in parsed_data.items() if fname.endswith(".cls") and info.working_directory == "crlf"]
+                            cls_files_with_crlf_in_working_directory = [fname for fname, info in parsed_data.items() if fname.endswith(".cls") and info.working_directory == "lf"]
                             if cls_files_with_crlf_in_working_directory:
-                                print(".cls files with CRLF in working directory:")
+                                print(".cls files with LF in working directory:")
                                 for file in cls_files_with_crlf_in_working_directory:
                                     print(f" - {file}")
                             else:
-                                print("No .cls files with CRLF in working directory found.")
+                                print("No .cls files with LF in working directory found.")
                                 
                         except Exception as e:
                             print(f"🔴 Error while parsing git ls-files output: {e}")
