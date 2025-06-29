@@ -22,6 +22,9 @@ jobs:
         pwd
         python -m pip install --upgrade pip
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+    - name: Check Git Config
+      run: |
+        git config --show-scope --get core.autocrlf
     - name: Run script
       run: |
         python './.github/workflows/scan_and_suggest.py'
