@@ -6,7 +6,8 @@ import re
 class GitEolInfo:
     index: str
     working_directory: str
-    attribute: str
+    attribute_text: str
+    attribute_eol: str
 
 def parse_git_ls_files_output(lines):
     result: Dict[str, GitEolInfo] = {}
@@ -22,11 +23,12 @@ def parse_git_ls_files_output(lines):
             return val.split('/', 1)[1] if '/' in val else val
         index = strip_prefix(index)
         working_dir = strip_prefix(working_dir)
-        attribute = strip_prefix(attr)
+        attribute_text = strip_prefix(attr)
+        attribute_eol = strip_prefix(eol)
         # Unescape quoted paths
         if path.startswith('"') and path.endswith('"'):
             # Remove quotes and decode unicode escapes
             path = bytes(path[1:-1], 'utf-8').decode('unicode_escape')
-        result[path] = GitEolInfo(index=index, working_directory=working_dir, attribute=attribute)
+        result[path] = GitEolInfo(index=index, working_directory=working_dir, attribute_text=attribute_text, attribute_eol=attribute_eol)
 
     return result
