@@ -357,7 +357,7 @@ def gitattributes_misconfigured(repo_path, counts):
             capture_output=True,
             text=True
         )
-        print(f".frm eol result: {frm_eol_result.stdout.strip()}")
+        print(f"\033[92m.frm eol result:\033[0m {frm_eol_result.stdout.strip()}")
 
         print(f"Checking EOL attribute for .cls files in {repo_path}")
         cls_eol_result = subprocess.run(
@@ -366,7 +366,7 @@ def gitattributes_misconfigured(repo_path, counts):
             capture_output=True,
             text=True
         )
-        print(f".cls eol result: {cls_eol_result.stdout.strip()}")
+        print(f"\033[92m.cls eol result:\033[0m {cls_eol_result.stdout.strip()}")
         
         # Parse the output to check if the EOL is set to LF
         frm_not_crlf = "eol: lf" in frm_eol_result.stdout or "eol: unspecified" in frm_eol_result.stdout
@@ -402,10 +402,10 @@ def gitattributes_misconfigured(repo_path, counts):
         print(f"Number of .frm files: {frm_count}, Number of .cls files: {cls_count}")
 
         if (frm_text and frm_not_crlf and frm_count > 0) or (cls_text and cls_not_crlf and cls_count > 0):
-            print("gitattributes check result: True")
+            print("gitattributes misconfigured: True")
             return True
         else:
-            print("gitattributes check result: False")
+            print("gitattributes misconfigured: False")
             return False
     except Exception as e:
         print(f"🔴 Error while checking .gitattributes: {e}")
