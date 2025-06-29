@@ -187,7 +187,9 @@ def main():
                             parsed_data = git_ls_parser.parse_git_ls_files_output(git_ls_output)
                             print("Parsed git ls-files output:")
                             for path, info in parsed_data.items():
-                                print(f"Path: {path}, Index: {info.index}, Working Directory: {info.working_directory}, Attribute: {info.attribute_text} {info.attribute_eol}")
+                                attr_text = ", ".join(info.attribute_text) if isinstance(info.attribute_text, list) else str(info.attribute_text)
+                                attr_eol = ", ".join(info.attribute_eol) if isinstance(info.attribute_eol, list) else str(info.attribute_eol)
+                                print(f"Path: {path}, Index: {info.index}, Working Directory: {info.working_directory}, Attribute: {attr_text} {attr_eol}")
                             
                             frm_files_with_lf_in_working_directory = [fname for fname, info in parsed_data.items() if fname.endswith(".frm") and info.working_directory == "lf"]
                             if frm_files_with_lf_in_working_directory:
