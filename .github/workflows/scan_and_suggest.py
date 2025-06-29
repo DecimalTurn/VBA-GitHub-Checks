@@ -170,27 +170,36 @@ def main():
                             print("Creating issue...")
                             create_issue_wrapper(token, repo, 'has a .gitattributes misconfiguration', 'Check E: .gitattributes is misconfigured.md', 'Check E')
 
-                            try:
-                                import git_ls_parser
-                                git_ls_output = gh.get_git_ls_files_output(repo_path)
-                                parsed_data = git_ls_parser.parse_git_ls_files_output(git_ls_output)
-                                print("Parsed git ls-files output:")
-                                for path, info in parsed_data.items():
-                                    print(f"Path: {path}, Index: {info.index}, Working Directory: {info.working_directory}, Attribute: {info.attribute}")
-                                    print("🟢 Successfully parsed git ls-files output.")
-                                # Using frm_files_with_lf_in_working_directory, check if there are any files with LF in the working directory
-                                frm_files_with_lf_in_working_directory = gh.get_frm_files_with_lf_in_working_directory(parsed_data)
-                                if frm_files_with_lf_in_working_directory:
-                                    print("Files with LF in working directory:")
-                                    for file in frm_files_with_lf_in_working_directory:
-                                        print(f" - {file}")
-                                else:
-                                    print("No files with LF in working directory found.")
-                            except Exception as e:
-                                print(f"🔴 Error while parsing git ls-files output: {e}")
+
 
                         else:
                             print("🟢 .gitattributes is configured correctly.")
+
+                        # Going beyond the .gitattributes checks, we can parse the output of `git ls-files` 
+                        # to check for line endings in actual files as they are in the working directory.
+                        # Note that the EOL in the working directory will depend on the core.autocrlf setting 
+                        # of the git client used to clone the repository. In the case of a unix system, like the 
+                        # GitHub Actions runner, the files will be checked out with core.autocrlf=false and this will immitate the 
+                        # content of the .zip file downloaded from GitHub.
+                        try:
+                            import git_ls_parser
+                            git_ls_output = gh.get_git_ls_files_output(repo_path)
+                            parsed_data = git_ls_parser.parse_git_ls_files_output(git_ls_output)
+                            print("Parsed git ls-files output:")
+                            for path, info in parsed_data.items():
+                                print(f"Path: {path}, Index: {info.index}, Working Directory: {info.working_directory}, Attribute: {info.attribute}")
+                                print("🟢 Successfully parsed git ls-files output.")
+                            # Using frm_files_with_lf_in_working_directory, check if there are any files with LF in the working directory
+                            frm_files_with_lf_in_working_directory = gh.get_frm_files_with_lf_in_working_directory(parsed_data)
+                            if frm_files_with_lf_in_working_directory:
+                                print("Files with LF in working directory:")
+                                for file in frm_files_with_lf_in_working_directory:
+                                    print(f" - {file}")
+                            else:
+                                print("No files with LF in working directory found.")
+                        except Exception as e:
+                            print(f"🔴 Error while parsing git ls-files output: {e}")
+
                     else:
                         print("🟡 .gitattributes file is missing.")
 
