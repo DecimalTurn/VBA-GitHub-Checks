@@ -411,7 +411,7 @@ def gitattributes_misconfigured(repo_path, counts):
         print(f"🔴 Error while checking .gitattributes: {e}")
         return False
 
-def frm_files_with_lf_in_working_directory(repo_path):
+def get_frm_files_with_lf_in_working_directory(repo_path):
     """
     Check if there are .frm files in the working directory with LF line endings using git_ls_parser.
     Returns a list of file names with LF in the working directory.
