@@ -270,6 +270,8 @@ def follow_up_check_E(token, repo_info, user, repo_name, issue):
                 print(f" - {path}")
             for path in cls_files_with_lf:
                 print(f" - {path}")
+        else:
+            print("No frm/cls files with LF line endings found in the working directory.")
     except Exception as e:
         error_message = (
             f"Error while parsing git ls-files output: {e}"
