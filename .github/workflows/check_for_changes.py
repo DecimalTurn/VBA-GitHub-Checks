@@ -251,7 +251,7 @@ def follow_up_check_E(token, repo_info, user, repo_name, issue):
     try:
         import git_ls_parser
         git_ls_output = gh.get_git_ls_files_output(repo_path)
-        print("git ls-files output: \n" + git_ls_output)
+        print("git ls-files output: \n" + ("\n".join(git_ls_output) if isinstance(git_ls_output, list) else str(git_ls_output)))
         parsed_data = git_ls_parser.parse_git_ls_files_output(git_ls_output)
 
         print("Parsed git ls-files output:")
