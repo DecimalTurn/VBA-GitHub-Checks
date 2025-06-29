@@ -411,33 +411,6 @@ def gitattributes_misconfigured(repo_path, counts):
         print(f"🔴 Error while checking .gitattributes: {e}")
         return False
 
-def get_frm_files_with_lf_in_working_directory(repo_path):
-    """
-    Check if there are .frm files in the working directory with LF line endings using git_ls_parser.
-    Returns a list of file names with LF in the working directory.
-    """
-    import git_ls_parser
-    if not repo_path:
-        repo_path = os.getcwd()
-
-    try:
-        print(f"Running 'git ls-files --eol *.frm' in {repo_path}")
-        frm_ls_eol = subprocess.run(
-            ["git", "ls-files", "--eol", "*.frm"],
-            cwd=repo_path,
-            capture_output=True,
-            text=True
-        )
-        print(f"\033[92m.frm ls eol result:\033[0m {frm_ls_eol.stdout.strip()}")
-
-        # Use git_ls_parser to parse the output
-        parsed = git_ls_parser.parse_git_ls_files_output(frm_ls_eol.stdout.splitlines())
-        lf_frm_files = [fname for fname, info in parsed.items() if info.working_directory == "lf"]
-        return lf_frm_files
-    except Exception as e:
-        print(f"🔴 Error while checking .frm files in working directory: {e}")
-        return []
-
 # This function will receive a list of repos and generate the body for the issue
 # The body of the issue will be a TOML file formatted as a code block
 # The format will be:

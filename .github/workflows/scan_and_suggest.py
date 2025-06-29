@@ -188,15 +188,23 @@ def main():
                             print("Parsed git ls-files output:")
                             for path, info in parsed_data.items():
                                 print(f"Path: {path}, Index: {info.index}, Working Directory: {info.working_directory}, Attribute: {info.attribute}")
-                                print("🟢 Successfully parsed git ls-files output.")
-                            # Using frm_files_with_lf_in_working_directory, check if there are any files with LF in the working directory
-                            frm_files_with_lf_in_working_directory = gh.get_frm_files_with_lf_in_working_directory(parsed_data)
+                            
+                            frm_files_with_lf_in_working_directory = [fname for fname, info in parsed_data.items() if fname.endswith(".frm") and info.working_directory == "lf"]
                             if frm_files_with_lf_in_working_directory:
-                                print("Files with LF in working directory:")
+                                print(".frm files with LF in working directory:")
                                 for file in frm_files_with_lf_in_working_directory:
                                     print(f" - {file}")
                             else:
-                                print("No files with LF in working directory found.")
+                                print("No .frm files with LF in working directory found.")
+
+                            cls_files_with_crlf_in_working_directory = [fname for fname, info in parsed_data.items() if fname.endswith(".cls") and info.working_directory == "crlf"]
+                            if cls_files_with_crlf_in_working_directory:
+                                print(".cls files with CRLF in working directory:")
+                                for file in cls_files_with_crlf_in_working_directory:
+                                    print(f" - {file}")
+                            else:
+                                print("No .cls files with CRLF in working directory found.")
+                                
                         except Exception as e:
                             print(f"🔴 Error while parsing git ls-files output: {e}")
 
