@@ -13,6 +13,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
+    - name: Check Git Config
+      run: |
+        git config --list --show-origin
     - name: Set up Python 3.10
       uses: actions/setup-python@v5
       with:
@@ -22,9 +25,6 @@ jobs:
         pwd
         python -m pip install --upgrade pip
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-    - name: Check Git Config
-      run: |
-        git config --list --show-origin | grep core.autocrlf
     - name: Run script
       run: |
         python './.github/workflows/scan_and_suggest.py'
