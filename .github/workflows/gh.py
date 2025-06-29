@@ -368,7 +368,7 @@ def gitattributes_misconfigured(repo_path, counts):
         )
         print(f"\033[92m.cls eol result:\033[0m {cls_eol_result.stdout.strip()}")
         
-        # Parse the output to check if the EOL is set to LF
+        # Parse the output to check if the EOL is not set to CRLF
         frm_not_crlf = "eol: lf" in frm_eol_result.stdout or "eol: unspecified" in frm_eol_result.stdout
         cls_not_crlf = "eol: lf" in cls_eol_result.stdout or "eol: unspecified" in cls_eol_result.stdout
         print(f".frm not CRLF: {frm_not_crlf}, .cls not CRLF: {cls_not_crlf}")
@@ -392,16 +392,16 @@ def gitattributes_misconfigured(repo_path, counts):
         print(f"\033[92m.cls text result:\033[0m {cls_text_result.stdout.strip()}")
 
         # Parse the output to check if the text attribute is set to auto
-        frm_text = "text: auto" in frm_text_result.stdout or "text: set" in frm_text_result.stdout
-        cls_text = "text: auto" in cls_text_result.stdout or "text: set" in cls_text_result.stdout
-        print(f".frm text: {frm_text}, .cls text: {cls_text}")
+        frm_text_attribute = "text: auto" in frm_text_result.stdout or "text: set" in frm_text_result.stdout
+        cls_text_attribute = "text: auto" in cls_text_result.stdout or "text: set" in cls_text_result.stdout
+        print(f".frm text: {frm_text_attribute}, .cls text: {cls_text_attribute}")
 
         # Check if the repo contains .frm and .cls files using the counts 
         frm_count = counts[".frm"]
         cls_count = counts[".cls"]
         print(f"Number of .frm files: {frm_count}, Number of .cls files: {cls_count}")
 
-        if (frm_text and frm_not_crlf and frm_count > 0) or (cls_text and cls_not_crlf and cls_count > 0):
+        if (frm_text_attribute and frm_not_crlf and frm_count > 0) or (cls_text_attribute and cls_not_crlf and cls_count > 0):
             print("gitattributes misconfigured: True")
             return True
         else:
@@ -410,7 +410,34 @@ def gitattributes_misconfigured(repo_path, counts):
     except Exception as e:
         print(f"🔴 Error while checking .gitattributes: {e}")
         return False
-    
+
+def frm_files_with_lf_in_working_directory(repo_path):
+    """
+    Check if there are .frm files in the working directory with LF line endings using git_ls_parser.
+    Returns a list of file names with LF in the working directory.
+    """
+    import git_ls_parser
+    if not repo_path:
+        repo_path = os.getcwd()
+
+    try:
+        print(f"Running 'git ls-files --eol *.frm' in {repo_path}")
+        frm_ls_eol = subprocess.run(
+            ["git", "ls-files", "--eol", "*.frm"],
+            cwd=repo_path,
+            capture_output=True,
+            text=True
+        )
+        print(f"\033[92m.frm ls eol result:\033[0m {frm_ls_eol.stdout.strip()}")
+
+        # Use git_ls_parser to parse the output
+        parsed = git_ls_parser.parse_git_ls_files_output(frm_ls_eol.stdout.splitlines())
+        lf_frm_files = [fname for fname, info in parsed.items() if info.working_directory == "lf"]
+        return lf_frm_files
+    except Exception as e:
+        print(f"🔴 Error while checking .frm files in working directory: {e}")
+        return []
+
 # This function will receive a list of repos and generate the body for the issue
 # The body of the issue will be a TOML file formatted as a code block
 # The format will be:
@@ -494,3 +521,24 @@ def generate_body_for_issue_for_scanned_repo(previous, new_repos):
         body += "\n"
     body += "```"
     return body
+
+def get_git_ls_files_output(repo_path):
+    """
+    Get the output of 'git ls-files --eol' for the given repo path.
+    Returns a list of lines from the command output.
+    """
+    try:
+        print(f"Running 'git ls-files --eol' in {repo_path}")
+        result = subprocess.run(
+            ["git", "ls-files", "--eol"],
+            cwd=repo_path,
+            capture_output=True,
+            text=True
+        )
+        if result.returncode != 0:
+            print(f"🔴 Error running 'git ls-files --eol': {result.stderr.strip()}")
+            return []
+        return result.stdout.splitlines()
+    except Exception as e:
+        print(f"🔴 Error while getting git ls-files output: {e}")
+        return []
