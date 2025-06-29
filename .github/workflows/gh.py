@@ -380,7 +380,7 @@ def gitattributes_misconfigured(repo_path, counts):
             capture_output=True,
             text=True
         )
-        print(f".frm text result: {frm_text_result.stdout.strip()}")
+        print(f"\033[92m.frm text result:\033[0m {frm_text_result.stdout.strip()}")
 
         print(f"Checking text attribute for .cls files in {repo_path}")
         cls_text_result = subprocess.run(
@@ -389,7 +389,7 @@ def gitattributes_misconfigured(repo_path, counts):
             capture_output=True,
             text=True
         )
-        print(f".cls text result: {cls_text_result.stdout.strip()}")
+        print(f"\033[92m.cls text result:\033[0m {cls_text_result.stdout.strip()}")
 
         # Parse the output to check if the text attribute is set to auto
         frm_text = "text: auto" in frm_text_result.stdout or "text: set" in frm_text_result.stdout
