@@ -232,16 +232,19 @@ def follow_up_check_E(token, repo_info, user, repo_name, issue):
         return
 
     comment = ""
+    subCheck = False
+    wrong_eol_files = False
+    number_of_wrong_eol_files = 0
+    frm_files_with_lf = []
+    cls_files_with_lf = []
 
     # Part specific to Check E
     try:
         misconfigured = gh.gitattributes_misconfigured(repo_path, counts)
     except Exception as e:
-        # Handle the error (logging, commenting, or reporting)
         error_message = (
             f"Error while checking .gitattributes configuration: {e}"
         )
-        # You might want to notify via comment or log
         print(error_message)
         raise
 
@@ -250,12 +253,10 @@ def follow_up_check_E(token, repo_info, user, repo_name, issue):
         git_ls_output = gh.get_git_ls_files_output(repo_path)
         parsed_data = git_ls_parser.parse_git_ls_files_output(git_ls_output)
 
-        # Check if there are still .frm and .cls files with LF line endings in the working directory
         frm_files_with_lf = [
             path for path, info in parsed_data.items()
             if info.working_directory == 'lf' and path.endswith('.frm')
         ]
-
         cls_files_with_lf = [
             path for path, info in parsed_data.items()
             if info.working_directory == 'lf' and path.endswith('.cls')
@@ -264,29 +265,46 @@ def follow_up_check_E(token, repo_info, user, repo_name, issue):
         if frm_files_with_lf or cls_files_with_lf:
             wrong_eol_files = True
             number_of_wrong_eol_files = len(frm_files_with_lf) + len(cls_files_with_lf)
-            # Print list of all .frm and .cls files with LF line endings
             print("Files with LF line endings in the working directory:")
             for path in frm_files_with_lf:
                 print(f" - {path}")
             for path in cls_files_with_lf:
                 print(f" - {path}")
-
     except Exception as e:
-        # Handle the error (logging, commenting, or reporting)
         error_message = (
             f"Error while parsing git ls-files output: {e}"
         )
-        # You might want to notify via comment or log
         print(error_message)
 
-
+    # SubCheck EA logic, inspired by other checks
     if not misconfigured:
-        comment = (
-            "Looks like you made some changes and the .gitattributes file is now correctly configured.\n"
-            "This issue is now resolved, so I'm closing it. If you have any questions, feel free to ask.\n"
-        )
-        gh.close_issue(token, main_repo_slug, issue, "completed")
-        handle_labels_after_completion(token, main_repo_slug, issue_number)
+        subCheck = gh.already_commented(token, main_repo_slug, issue_number, "[SubCheck EA]")
+        if not subCheck:
+            comment = "Looks like you made some changes and the .gitattributes file is now correctly configured.\n"
+        if not wrong_eol_files:
+            comment += "This issue is now resolved, so I'm closing it. If you have any questions, feel free to ask.\n"
+            gh.close_issue(token, main_repo_slug, issue, "completed")
+            handle_labels_after_completion(token, main_repo_slug, issue_number)
+        else:
+            if not subCheck:
+                comment += (
+                    f"However, there are still {number_of_wrong_eol_files} .frm/.cls files with LF line endings. "
+                    "You need to renormalize these files. [SubCheck EA]\n"
+                    "\n"
+                    "If you still have the original files exported from the VBE in your working directory and you are able to use Git from the command line, you can simply run the following 2 commands:\n"
+                    "```bash\n"
+                    "git add . --renormalize\n"
+                    "git commit -m \"Restore line endings\"\n"
+                    "```\n"
+                    "\n"
+                    "<h3>Option B:</h3>\n"
+                    "You could also simply use [Enforce-CRLF](https://github.com/DecimalTurn/Enforce-CRLF) which will make sure to enforce CRLF in your repo for all the current files and will also prevent LF from being introduced by mistake in the future.\n"
+                    "\n"
+                    "For more information on how to configure your .gitattributes file and why you don't want to set the `text` property for VBA files, you can have a look at https://github.com/DecimalTurn/VBA-on-GitHub.\n"
+                    "\n"
+                    "And if you have any questions, feel free to ask it here and a real human will answer you.\n"
+                )
+                gh.add_label_to_issue(token, main_repo_slug, issue_number, "partially completed")
 
     if comment:
         write_comment(token, main_repo_slug, issue, comment)
