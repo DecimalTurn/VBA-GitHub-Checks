@@ -16,15 +16,22 @@ def parse_git_ls_files_output(lines):
         # Split on whitespace and tabs, file path is always the last field
         parts = re.split(r'[ \t]+', line.strip(), maxsplit=4)
         if len(parts) < 5:
-            continue  # Skip malformed lines
-        index, working_dir, attr, eol, path = parts
+            # Try to handle missing eol section (e.g., no space after text property)
+            # Try splitting with maxsplit=3
+            parts = re.split(r'[ \t]+', line.strip(), maxsplit=3)
+            if len(parts) < 4:
+                continue  # Still malformed, skip
+            index, working_dir, attr, path = parts
+            eol = 'unspecified'
+        else:
+            index, working_dir, attr, eol, path = parts
         # Remove prefix before '/' for each field
         def strip_prefix(val):
             return val.split('/', 1)[1] if '/' in val else val
         index = strip_prefix(index)
         working_dir = strip_prefix(working_dir)
         attribute_text = strip_prefix(attr)
-        attribute_eol = strip_prefix(eol)
+        attribute_eol = strip_prefix(eol) if eol != 'unspecified' else eol
         # Unescape quoted paths
         if path.startswith('"') and path.endswith('"'):
             # Remove quotes and decode unicode escapes
