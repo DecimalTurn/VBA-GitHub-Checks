@@ -253,20 +253,31 @@ def follow_up_check_E(token, repo_info, user, repo_name, issue):
         git_ls_output = gh.get_git_ls_files_output(repo_path)
         parsed_data = git_ls_parser.parse_git_ls_files_output(git_ls_output)
 
-        frm_files_with_lf = [
-            path for path, info in parsed_data.items()
-            if info.working_directory == 'lf' and path.endswith('.frm')
-        ]
-        cls_files_with_lf = [
-            path for path, info in parsed_data.items()
-            if info.working_directory == 'lf' and path.endswith('.cls')
-        ]
+        print("Parsed git ls-files output:")
+        for path, info in parsed_data.items():
+            print(f"Path: {path}, Index: {info.index}, Working Directory: {info.working_directory}, Attribute: {info.attribute_text} {info.attribute_eol}")
+        
+        frm_files_with_lf_in_working_directory = [fname for fname, info in parsed_data.items() if fname.endswith(".frm") and info.working_directory == "lf"]
+        if frm_files_with_lf_in_working_directory:
+            print(".frm files with LF in working directory:")
+            for file in frm_files_with_lf_in_working_directory:
+                print(f" - {file}")
+        else:
+            print("No .frm files with LF in working directory found.")
 
-        if frm_files_with_lf or cls_files_with_lf:
+        cls_files_with_lf_in_working_directory = [fname for fname, info in parsed_data.items() if fname.endswith(".cls") and info.working_directory == "lf"]
+        if cls_files_with_lf_in_working_directory:
+            print(".cls files with LF in working directory:")
+            for file in cls_files_with_lf_in_working_directory:
+                print(f" - {file}")
+        else:
+            print("No .cls files with LF in working directory found.")
+
+        if frm_files_with_lf_in_working_directory or cls_files_with_lf_in_working_directory:
             wrong_eol_files = True
-            number_of_wrong_eol_files = len(frm_files_with_lf) + len(cls_files_with_lf)
+            number_of_wrong_eol_files = len(frm_files_with_lf_in_working_directory) + len(cls_files_with_lf_in_working_directory)
             print("Files with LF line endings in the working directory:")
-            for path in frm_files_with_lf:
+            for path in frm_files_with_lf_in_working_directory:
                 print(f" - {path}")
             for path in cls_files_with_lf:
                 print(f" - {path}")
