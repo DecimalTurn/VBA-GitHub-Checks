@@ -22,7 +22,7 @@ def parse_git_ls_files_output(lines):
             if len(parts) < 4:
                 continue  # Still malformed, skip
             index, working_dir, attr, path = parts
-            eol = 'unspecified'
+            eol = 'eol=unspecified'
         else:
             index, working_dir, attr, eol, path = parts
         # Remove prefix before '/' for each field
@@ -31,7 +31,7 @@ def parse_git_ls_files_output(lines):
         index = strip_prefix(index)
         working_dir = strip_prefix(working_dir)
         attribute_text = strip_prefix(attr)
-        attribute_eol = strip_prefix(eol) if eol != 'unspecified' else eol
+        attribute_eol = eol
         # Unescape quoted paths
         if path.startswith('"') and path.endswith('"'):
             # Remove quotes and decode unicode escapes
