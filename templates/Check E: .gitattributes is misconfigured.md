@@ -2,7 +2,7 @@ Hi @%{user}%,
 
 It seems like there is a small issue with your repo named [%{reponame}%](%{url}%).
 
-Currently, the .gitattributes file is misconfigured and there is a risk that if people try to clone or download your repo as a .zip file, they will get an error due to line endings in .cls or .frm files.
+Currently, the .gitattributes file is misconfigured: if people try to clone or download your repo as a .zip file, they will get have a bug if they try to import .cls or .frm files in the Visual Basic Editor (VBE) because these files downloaded files would have Unix-style line endings (LF) as opposed to Windows-style line endings (CRLF).
 
 Here's a simple solution:
 
