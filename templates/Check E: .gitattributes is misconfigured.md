@@ -16,7 +16,9 @@ Here's a simple solution:
 ```
 
 <h2>Step 2: Restore CRLF the line endings in the Git index.</h2>
-<h3>Option A:</h3> 
+
+<h3>Option A:</h3>
+
 If you still have the original files exported from the VBE in your working directory and you are able to use Git from the command line, you can simply run the following 2 commands:
 
 ```bash
@@ -25,6 +27,7 @@ git commit -m "Restore line endings"
 ```
 
 <h3>Option B:</h3>
+
 You could also simply use [Enforce-CRLF](https://github.com/DecimalTurn/Enforce-CRLF) which will make sure to enforce CRLF in your repo for all the current files and will also prevent LF from being introduced by mistake in the future.
 
 For more information on how to configure your .gitattributes file and why you don't want to set the `text` property for VBA files, you can have a look at https://github.com/DecimalTurn/VBA-on-GitHub.
