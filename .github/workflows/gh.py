@@ -156,6 +156,10 @@ def update_issue(token, this_repo_slug, issue_number, body):
         print(f"🔴 Failed to update issue. Status code: {response.status_code}")
         print(response.json())
 
+def append_to_issue_body_if_missing(token, repo_slug, issue_number, content):
+    if not get_issue_body(token, repo_slug, issue_number).find(content) == -1:
+        append_to_issue_body(token, repo_slug, issue_number, content)
+
 def append_to_issue_body(token, repo_slug, issue_number, content):
     new_body = get_issue_body(token, repo_slug, issue_number) + content
     update_issue(token, repo_slug, issue_number, new_body)
