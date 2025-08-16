@@ -6,6 +6,12 @@ import re
 import utils
 import datetime
 
+office_vba_extensions = ['.docm', '.dotm', '.xlsm', '.xltm', '.xlsb', '.xlam', '.pptm', '.ppam', 'potm']
+code_extensions = ['.bas', '.cls', '.frm', '.vba', '.vbs', '.vb', '.d.vb', '.txt', 'No ext']
+config_extensions = ['.vbproj']
+
+# how to call office_vba_extensions from another file?
+
 def get_all_issues_title(token, repo_slug):
     url = f"https://api.github.com/repos/{repo_slug}/issues"
     headers = {
@@ -134,7 +140,7 @@ def get_issue_for_scanned_repo(token, this_repo_slug):
     # If no matching issue is found, return None
     return None
 
-def update_issue_for_scanned_repo(token, this_repo_slug, issue_number, body):
+def update_issue(token, this_repo_slug, issue_number, body):
     url = f"https://api.github.com/repos/{this_repo_slug}/issues/{issue_number}"
     headers = {
         'Accept': 'application/vnd.github.v3+json',
@@ -150,6 +156,12 @@ def update_issue_for_scanned_repo(token, this_repo_slug, issue_number, body):
         print(f"🔴 Failed to update issue. Status code: {response.status_code}")
         print(response.json())
 
+def append_to_issue_body(token, repo_slug, issue_number, content):
+    new_body = get_issue_body(token, repo_slug, issue_number) + content
+    update_issue(token, repo_slug, issue_number, new_body)
+
+def get_issue_body(token, repo_slug, issue_number):
+    return get_issue(token, repo_slug, issue_number)['body']
 
 # Check if the issue already has a comment containing the provided substring
 def already_commented(token, repo_slug, issue_number, sub_string):
@@ -247,7 +259,12 @@ def clone_repo(repo_url):
         raise ValueError("Problem with cloning.")
     
 def count_vba_related_files(repo_path):
-    vba_extensions = ['.bas', '.cls', '.frm', '.vba', '.vbs', '.vb', '.d.vb', '.vbproj', '.txt', 'No ext']
+
+    vba_extensions = []
+    vba_extensions.extend(code_extensions)
+    vba_extensions.extend(config_extensions)
+    vba_extensions.extend(office_vba_extensions)
+    
     counts = {ext: 0 for ext in vba_extensions}
     
     for root, dirs, files in os.walk(repo_path):

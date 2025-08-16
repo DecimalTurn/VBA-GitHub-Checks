@@ -50,6 +50,8 @@ def read_template_file(template_path, replacements):
 def report_file_extensions_issue(token, repo, counts):
     global all_issues
 
+    main_repo_slug = os.getenv('GITHUB_REPOSITORY')
+
     try:
         if repo['language'] == "Visual Basic .NET" and counts[".vb"] > 0 and counts[".vbproj"] == 0 and counts[".d.vb"] == 0 and counts[".bas"] == 0:       
             # VB.NET extension used for VBA code
@@ -66,6 +68,15 @@ def report_file_extensions_issue(token, repo, counts):
         if repo['language'] is None and counts[".txt"] > 0:
             # txt extension used for VBA code
             create_issue_wrapper(token, repo, 'is not detected as VBA', 'Check D: Use of txt extension.md', 'Check D')
+
+        if repo['language'] is None and any(counts[ext] > 0 for ext in gh.office_vba_extensions) and all(counts[ext] == 0 for ext in gh.code_extensions):
+            # create_issue_wrapper(token, repo, 'does not have any source code', 'Check F: Missing source code.md', 'Check F')
+
+            # Since the issue template is not ready, we only want to preserve the list of repos that are in this situation by appending to a list of repo contained in the body of an issue.
+            # This means that we have to call the github API and edit the following issue https://github.com/DecimalTurn/VBA-GitHub-Checks/issues/871
+            # We simply want to add a the URL of the repo as a new bullet point to the list 
+            new_repo = f" - {repo['html_url']}\n"
+            gh.append_to_issue_body(token, main_repo_slug, 871, new_repo)
 
     except Exception as e:
         print(f"🔴 An unexpected error occurred: {e}")
