@@ -157,7 +157,7 @@ def update_issue(token, this_repo_slug, issue_number, body):
         print(response.json())
 
 def append_to_issue_body_if_missing(token, repo_slug, issue_number, content):
-    if not get_issue_body(token, repo_slug, issue_number).find(content) == -1:
+    if get_issue_body(token, repo_slug, issue_number).find(content) == -1:
         append_to_issue_body(token, repo_slug, issue_number, content)
 
 def append_to_issue_body(token, repo_slug, issue_number, content):
@@ -287,13 +287,17 @@ def count_vba_related_files(repo_path):
                     if file.endswith(ext) and is_vba_file(file_path):
                         counts[ext] += 1
                     continue
+                if ext in office_vba_extensions:
+                    if file.endswith(ext) and utils.is_binary_file(file_path):
+                        counts[ext] += 1
+                    continue
                 if file.endswith(ext):
                     counts[ext] += 1
                     continue
                 if ext == 'No ext' and '.' not in file:
                     if is_vba_file(file_path):
                         counts[ext] += 1
-                        continue
+                    continue
 
     # Print the counts
     for ext, count in counts.items():
