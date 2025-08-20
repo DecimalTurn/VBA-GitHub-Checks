@@ -75,7 +75,7 @@ def report_file_extensions_issue(token, repo, counts):
             # Since the issue template is not ready, we only want to preserve the list of repos that are in this situation by appending to a list of repo contained in the body of an issue.
             # This means that we have to call the github API and edit the following issue https://github.com/DecimalTurn/VBA-GitHub-Checks/issues/871
             # We simply want to add a the URL of the repo as a new bullet point to the list 
-            new_repo = f" - {repo['html_url']}\n"
+            new_repo = f" 1. {repo['html_url']}\n"
             gh.append_to_issue_body_if_missing(token, main_repo_slug, 871, new_repo)
 
     except Exception as e:
@@ -238,3 +238,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
