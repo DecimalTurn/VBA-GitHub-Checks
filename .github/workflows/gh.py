@@ -187,6 +187,21 @@ def already_commented(token, repo_slug, issue_number, sub_string):
     
     return False
 
+def get_comment(token, repo_slug, comment_id):
+    """Get a specific comment by its ID"""
+    url = f"https://api.github.com/repos/{repo_slug}/issues/comments/{comment_id}"
+    headers = {
+        'Accept': 'application/vnd.github.v3+json',
+        'Authorization': f'token {token}'
+    }
+    response = requests.get(url, headers=headers)
+    
+    if response.status_code == 200:
+        return response.json()
+    else:
+        print(f"Failed to fetch comment {comment_id}. Status code: {response.status_code}")
+        return None
+
 def add_label_to_issue(token, repo_slug, issue_number, label):
     url = f"https://api.github.com/repos/{repo_slug}/issues/{issue_number}/labels"
     headers = {
