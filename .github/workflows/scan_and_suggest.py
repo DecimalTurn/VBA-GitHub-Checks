@@ -2,6 +2,7 @@ import requests
 import os
 import subprocess
 import time
+import hashlib
 # Custom modules
 import gh
 import utils
@@ -9,6 +10,15 @@ import utils
 all_issues_title = None
 
 def already_issue_for_user(user):   
+    # Iterate through all issues and check if the user matches
+    for existing_issue in all_issues_title:
+        # Extract the user from the existing issue title
+        user_in_issue = existing_issue.split('/')[0].replace("[", "")
+        if user == user_in_issue:
+            return True
+    return False
+
+def already_open_issue_for_user(user):   
     # Iterate through all issues and check if the user matches
     for existing_issue in all_issues_title:
         # Extract the user from the existing issue title
@@ -115,11 +125,40 @@ def create_issue_wrapper(token, repo, issue_title_suffix, template_name, label_n
 def get_slug(repo):
     return repo['owner']['login'] + "/" + repo['name']
 
+def load_exclusion_list(exclusion_file_path):
+    """Load SHA256 hashes from the exclusion file"""
+    exclusion_hashes = set()
+    try:
+        with open(exclusion_file_path, 'r') as file:
+            for line in file:
+                hash_value = line.strip()
+                if hash_value:  # Skip empty lines
+                    exclusion_hashes.add(hash_value.lower())
+        print(f"Loaded {len(exclusion_hashes)} exclusion hashes from {exclusion_file_path}")
+    except FileNotFoundError:
+        print(f"Warning: Exclusion file {exclusion_file_path} not found. No users will be excluded.")
+    except Exception as e:
+        print(f"Error reading exclusion file {exclusion_file_path}: {e}")
+    return exclusion_hashes
+
+def get_username_sha256(username):
+    """Compute SHA256 hash of a username"""
+    return hashlib.sha256(username.encode('utf-8')).hexdigest().lower()
+
+def is_user_excluded(username, exclusion_hashes):
+    """Check if a username's SHA256 hash is in the exclusion list"""
+    user_hash = get_username_sha256(username)
+    return user_hash in exclusion_hashes
+
 def main():
 
     global all_issues_title
     token = os.getenv('GITHUB_TOKEN')
     all_issues_title = gh.get_all_issues_title(token, os.getenv('GITHUB_REPOSITORY'))
+
+    # Load exclusion list
+    exclusion_file_path = './exclusion.txt'
+    exclusion_hashes = load_exclusion_list(exclusion_file_path)
 
     query = 'VBA NOT VBScript'
     # query = 'VBA in:name,description'
@@ -143,8 +182,14 @@ def main():
                 print(f"URL: {repo['html_url']}")
                 print(f"Updated at: {repo['updated_at']}")
                 
-                # Spam prevention
+                # Check if user is excluded
                 user = repo['owner']['login']
+                if is_user_excluded(user, exclusion_hashes):
+                    print(f"🚫 User {user} is excluded (SHA256 hash matches exclusion list)")
+                    print('-' * 40)
+                    continue
+                
+                # Spam prevention
                 if already_issue_for_user(user):
                     print(f"🟡 Issue already exists for user: {user}")
                     print('-' * 40)
