@@ -8,6 +8,7 @@ import gh
 import utils
 
 all_issues_title = None
+all_open_issues_title = None
 
 def already_issue_for_user(user):   
     # Iterate through all issues and check if the user matches
@@ -19,8 +20,8 @@ def already_issue_for_user(user):
     return False
 
 def already_open_issue_for_user(user):   
-    # Iterate through all issues and check if the user matches
-    for existing_issue in all_issues_title:
+    # Iterate through all open issues and check if the user matches
+    for existing_issue in all_open_issues_title:
         # Extract the user from the existing issue title
         user_in_issue = existing_issue.split('/')[0].replace("[", "")
         if user == user_in_issue:
@@ -125,6 +126,41 @@ def create_issue_wrapper(token, repo, issue_title_suffix, template_name, label_n
 def get_slug(repo):
     return repo['owner']['login'] + "/" + repo['name']
 
+def get_open_issues_title(token, repo_slug):
+    """Get titles of only open issues"""
+    url = f"https://api.github.com/repos/{repo_slug}/issues"
+    headers = {
+        'Accept': 'application/vnd.github.v3+json',
+        'Authorization': f'token {token}'
+    }
+    
+    params = {
+        'per_page': 100,  # Maximum number of issues per page
+        'state': 'open',  # Fetch only open issues
+        'page': 1         # Start with the first page
+    }
+    
+    all_open_issues_title = []
+    
+    while True:
+        response = requests.get(url, headers=headers, params=params)
+        
+        if response.status_code == 200:
+            issues = response.json()
+            all_open_issues_title.extend([issue['title'] for issue in issues])
+            
+            if len(issues) < 100:
+                # If fewer than 100 issues were returned, this is the last page
+                break
+            else:
+                # Move to the next page
+                params['page'] += 1
+        else:
+            print(f"🔴 Failed to fetch open issues. Status code: {response.status_code}")
+            raise ValueError("Problem while fetching open issues.")
+    
+    return all_open_issues_title
+
 def load_exclusion_list(exclusion_file_path):
     """Load SHA256 hashes from the exclusion file"""
     exclusion_hashes = set()
@@ -152,9 +188,10 @@ def is_user_excluded(username, exclusion_hashes):
 
 def main():
 
-    global all_issues_title
+    global all_issues_title, all_open_issues_title
     token = os.getenv('GITHUB_TOKEN')
     all_issues_title = gh.get_all_issues_title(token, os.getenv('GITHUB_REPOSITORY'))
+    all_open_issues_title = get_open_issues_title(token, os.getenv('GITHUB_REPOSITORY'))
 
     # Load exclusion list
     exclusion_file_path = './exclusion.txt'
@@ -189,9 +226,9 @@ def main():
                     print('-' * 40)
                     continue
                 
-                # Spam prevention
-                if already_issue_for_user(user):
-                    print(f"🟡 Issue already exists for user: {user}")
+                # Spam prevention - check for open issues only
+                if already_open_issue_for_user(user):
+                    print(f"🟡 Open issue already exists for user: {user}")
                     print('-' * 40)
                     continue
 
