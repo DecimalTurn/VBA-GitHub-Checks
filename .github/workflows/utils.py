@@ -39,3 +39,19 @@ def get_user_from_title(issue_title):
     if issue_title.startswith('[') and ']' in issue_title:
         return issue_title.split('/')[0].replace("[", "")
     return None   
+
+def load_exclusion_list(exclusion_file_path):
+    """Load SHA256 hashes from the exclusion file"""
+    exclusion_hashes = set()
+    try:
+        with open(exclusion_file_path, 'r') as file:
+            for line in file:
+                hash_value = line.strip()
+                if hash_value:  # Skip empty lines
+                    exclusion_hashes.add(hash_value.lower())
+        print(f"Loaded {len(exclusion_hashes)} exclusion hashes from {exclusion_file_path}")
+    except FileNotFoundError:
+        print(f"Warning: Exclusion file {exclusion_file_path} not found. No users will be excluded.")
+    except Exception as e:
+        print(f"Error reading exclusion file {exclusion_file_path}: {e}")
+    return exclusion_hashes

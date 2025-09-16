@@ -41,12 +41,20 @@ def main(issue_id, comment_id):
     if comment['body'].strip().lower().startswith("stop"):
         user = utils.get_user_from_title(issue['title'])
         if user:
-            # Add the SHA256 hash of the username to the exclusion file (following the same pattern as scan_and_suggest.py)
+            # Generate the SHA256 hash of the username
             user_hash = hashlib.sha256(user.encode('utf-8')).hexdigest().lower()
+            
+            # Check if the user is already in the exclusion list
             exclusion_file = 'exclusion.txt'
-            with open(exclusion_file, 'a') as f:
-                f.write(user_hash + '\n')
-            print(f"User '{user}' (hash: {user_hash}) added to exclusion list.")
+            existing_exclusions = utils.load_exclusion_list(exclusion_file)
+            
+            if user_hash in existing_exclusions:
+                print(f"User '{user}' (hash: {user_hash}) is already in the exclusion list.")
+            else:
+                # Add the SHA256 hash of the username to the exclusion file
+                with open(exclusion_file, 'a') as f:
+                    f.write(user_hash + '\n')
+                print(f"User '{user}' (hash: {user_hash}) added to exclusion list.")
         else:
             print("Could not extract user from issue title.")
     else:
