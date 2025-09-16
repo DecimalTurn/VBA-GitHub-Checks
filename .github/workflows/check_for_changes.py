@@ -40,7 +40,7 @@ def follow_up_issues(token, repo_slug):
         if repo_info['status_code'] == 404:
             print(f"Repo {user}/{repo_name} has been deleted, closing issue {issue['title']}")
             gh.close_issue(token, repo_slug, issue, "not_planned")
-            write_comment(token, repo_slug, issue, "Looks like the repository has been deleted or privated. Closing the issue.")
+            gh.write_comment(token, repo_slug, issue, "Looks like the repository has been deleted or privated. Closing the issue.")
             gh.add_label_to_issue(token, os.getenv('GITHUB_REPOSITORY'), issue['number'], "repo deleted")
             continue
         
@@ -96,7 +96,7 @@ def follow_up_check_A(token, repo_info, user, repo_name, issue):
             comment += "There are still files with the .vb extension. Is this intentional? [SubCheck AB]" + "\n"  
 
     if comment:
-        write_comment(token, main_repo_slug, issue, comment)
+        gh.write_comment(token, main_repo_slug, issue, comment)
 
 def follow_up_check_B(token, repo_info, user, repo_name, issue):
 
@@ -138,7 +138,7 @@ def follow_up_check_B(token, repo_info, user, repo_name, issue):
             comment += "There are still files with the .vbs extension. Is this intentional? [SubCheck BB]" + "\n"  
 
     if comment:
-        write_comment(token, main_repo_slug, issue, comment)
+        gh.write_comment(token, main_repo_slug, issue, comment)
 
 def follow_up_check_C(token, repo_info, user, repo_name, issue):
 
@@ -176,7 +176,7 @@ def follow_up_check_C(token, repo_info, user, repo_name, issue):
             comment += "There are still files with no extension that contain VBA code. Is this intentional? [SubCheck CB]" + "\n"  
 
     if comment:
-        write_comment(token, main_repo_slug, issue, comment)
+        gh.write_comment(token, main_repo_slug, issue, comment)
 
 def follow_up_check_D(token, repo_info, user, repo_name, issue):
 
@@ -218,7 +218,7 @@ def follow_up_check_D(token, repo_info, user, repo_name, issue):
             comment += "There are still files with the .txt extension that contain VBA code. Is this intentional? [SubCheck DB]" + "\n"  
 
     if comment:
-        write_comment(token, main_repo_slug, issue, comment)
+        gh.write_comment(token, main_repo_slug, issue, comment)
 
 def follow_up_check_E(token, repo_info, user, repo_name, issue):
 
@@ -320,7 +320,7 @@ def follow_up_check_E(token, repo_info, user, repo_name, issue):
                 gh.add_label_to_issue(token, main_repo_slug, issue_number, "partially completed")
 
     if comment:
-        write_comment(token, main_repo_slug, issue, comment)
+        gh.write_comment(token, main_repo_slug, issue, comment)
 
 # This function looks inside the gitattributes file of the repository to check if the they added a rule to 
 # consider the extension as VBA via the linguist-language override
@@ -389,29 +389,6 @@ def get_counts(token, user, repo_name):
     except Exception as e:
         print(f"🔴 Error counting VBA-related files: {e}")
         return
-
-def write_comment(token, repo_slug, issue, comment):
-    issue_number = issue['number']
-    
-    if issue_number:
-        url = f"https://api.github.com/repos/{repo_slug}/issues/{issue_number}/comments"
-        headers = {
-            'Accept': 'application/vnd.github.v3+json',
-            'Authorization': f'token {token}'
-        }
-        data = {
-            'body': comment
-        }
-        
-        response = requests.post(url, headers=headers, json=data)
-        
-        if response.status_code == 201:
-            print(f"🟢 Comment posted successfully on issue {issue_number}")
-        else:
-            print(f"🔴 Failed to post comment on issue {issue_number}. Status code: {response.status_code}")
-            print(response.json())
-    else:
-        print(f"Failed to get issue number for issue: {issue['title']}")
 
 
 def main():

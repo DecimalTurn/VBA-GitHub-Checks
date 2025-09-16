@@ -55,6 +55,26 @@ def main(issue_id, comment_id):
                 with open(exclusion_file, 'a') as f:
                     f.write(user_hash + '\n')
                 print(f"User '{user}' (hash: {user_hash}) added to exclusion list.")
+            
+            # Add the "not-interested" label to the issue
+            try:
+                gh.add_label_to_issue(github_token, repo_name, issue_id, "not-interested")
+            except Exception as e:
+                print(f"Warning: Could not add label to issue: {e}")
+            
+            # Post a comment on the issue
+            try:
+                comment_body = "Your request to stop those notifications has been received, we won't create further automated issues for your repos."
+                gh.create_comment(github_token, repo_name, issue_id, comment_body)
+            except Exception as e:
+                print(f"Warning: Could not create comment: {e}")
+            
+            # Close the issue as not-planned
+            try:
+                gh.close_issue(github_token, repo_name, issue, "not_planned")
+            except Exception as e:
+                print(f"Warning: Could not close issue: {e}")
+                
         else:
             print("Could not extract user from issue title.")
     else:

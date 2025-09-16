@@ -202,6 +202,42 @@ def get_comment(token, repo_slug, comment_id):
         print(f"Failed to fetch comment {comment_id}. Status code: {response.status_code}")
         return None
 
+def create_comment(token, repo_slug, issue_number, body):
+    """Create a comment on an issue"""
+    if not issue_number:
+        print(f"🔴 Failed to create comment: issue_number is required")
+        return None
+        
+    url = f"https://api.github.com/repos/{repo_slug}/issues/{issue_number}/comments"
+    headers = {
+        'Accept': 'application/vnd.github.v3+json',
+        'Authorization': f'token {token}'
+    }
+    data = {
+        'body': body
+    }
+    
+    response = requests.post(url, headers=headers, json=data)
+    
+    if response.status_code == 201:
+        print(f"🟢 Comment created successfully on issue {issue_number}")
+        return response.json()
+    else:
+        print(f"🔴 Failed to create comment on issue {issue_number}. Status code: {response.status_code}")
+        print(response.json())
+        return None
+
+def write_comment(token, repo_slug, issue, comment):
+    """Create a comment on an issue (convenience function that takes issue object)"""
+    issue_number = issue.get('number') if isinstance(issue, dict) else getattr(issue, 'number', None)
+    
+    if not issue_number:
+        issue_title = issue.get('title') if isinstance(issue, dict) else getattr(issue, 'title', 'Unknown')
+        print(f"🔴 Failed to get issue number for issue: {issue_title}")
+        return None
+    
+    return create_comment(token, repo_slug, issue_number, comment)
+
 def add_label_to_issue(token, repo_slug, issue_number, label):
     url = f"https://api.github.com/repos/{repo_slug}/issues/{issue_number}/labels"
     headers = {
