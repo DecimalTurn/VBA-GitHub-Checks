@@ -14,7 +14,7 @@ def already_issue_for_user(user):
     # Iterate through all issues and check if the user matches
     for existing_issue in all_issues_title:
         # Extract the user from the existing issue title
-        user_in_issue = existing_issue.split('/')[0].replace("[", "")
+        user_in_issue = utils.get_user_from_title(existing_issue)
         if user == user_in_issue:
             return True
     return False
@@ -23,11 +23,12 @@ def already_open_issue_for_user(user):
     # Iterate through all open issues and check if the user matches
     for existing_issue in all_open_issues_title:
         # Extract the user from the existing issue title
-        user_in_issue = existing_issue.split('/')[0].replace("[", "")
+        user_in_issue = utils.get_user_from_title(existing_issue)
         if user == user_in_issue:
             return True
     return False
 
+ 
 
 def search_github_repos(query, sort='updated', order='desc', per_page=60, page=1):
     url = f"https://api.github.com/search/repositories"

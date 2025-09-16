@@ -27,7 +27,7 @@ def follow_up_issues(token, repo_slug):
             continue
 
         # Extract the user and repo_name from the issue title
-        user = issue['title'].split('/')[0].replace("[", "")
+        user = utils.get_user_from_title(issue['title'])
         repo_name = issue['title'].split('/')[1].split(']')[0]
         repo_url = "https://github.com/" + repo_slug
 

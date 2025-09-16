@@ -34,3 +34,8 @@ def is_binary_file(path, blocksize=1024):
         chunk = f.read(blocksize)
     return bool(chunk.translate(None, textchars))
 
+def get_user_from_title(issue_title):
+    """Extract the username from the issue title."""
+    if issue_title.startswith('[') and ']' in issue_title:
+        return issue_title.split('/')[0].replace("[", "")
+    return None   
