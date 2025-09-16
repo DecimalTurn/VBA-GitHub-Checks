@@ -105,6 +105,16 @@ def create_issue_wrapper(token, repo, issue_title_suffix, template_name, label_n
         slug = get_slug(repo)
         issue_title = f"[{slug}] {issue_title_suffix}"
         
+        # Check if there's a recently closed issue with the same title
+        try:
+            if gh.check_recently_closed_issue(token, os.getenv('GITHUB_REPOSITORY'), issue_title, months=3):
+                print(f"🔴 An identical issue was closed recently. Skipping issue creation for: {issue_title}")
+                return
+        except Exception as e:
+            print(f"🔴 Error checking for recently closed issues: {e}")
+            print(f"🔴 Skipping issue creation as a safety measure for: {issue_title}")
+            return
+        
         try:
             issue_body = read_template_file(template_path, replacements)
         except Exception as e:
