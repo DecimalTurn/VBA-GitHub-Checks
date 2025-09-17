@@ -18,6 +18,7 @@ This repo uses automated scripts via GitHub Actions to check for newly updated V
 * Check C: VBA code files are using no file extension.
 * Check D: VBA code files are using the `txt` file extension.
 * Check E: VBA repo has a .gitattributes misconfiguration.
+* Check F: VBA repo has `.frm` and `.cls` files with un-normalized line endings.
 
 ## More info
 If you are looking for more info on how to configure your VBA repos, check out [VBA-on-GitHub](https://github.com/DecimalTurn/VBA-on-GitHub). 

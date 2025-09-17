@@ -51,6 +51,8 @@ To keep LF in the Index and only perform CRLF conversion at checkout, you can us
 *.frm  text eol=crlf
 ```
 
+<hr>
+
 For more information on how to configure your `.gitattributes` file and why you generally don't want to set the `text` property for VBA files, you can have a look at https://github.com/DecimalTurn/VBA-on-GitHub.
 
 And if you have any questions, feel free to ask it here and a real human will answer you.

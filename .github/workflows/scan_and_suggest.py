@@ -93,7 +93,7 @@ def report_file_extensions_issue(token, repo, counts):
     except Exception as e:
         print(f"🔴 An unexpected error occurred: {e}")
 
-def create_issue_wrapper(token, repo, issue_title_suffix, template_name, label_name):
+def create_issue_wrapper(token, repo, issue_title_suffix, template_name, label_name, additional_replacements=None):
         # Read and process the template file
         template_path = './templates/' + template_name
         replacements = {
@@ -101,6 +101,10 @@ def create_issue_wrapper(token, repo, issue_title_suffix, template_name, label_n
             'reponame': repo['name'],
             'url': repo['html_url']
         }
+        
+        # Add any additional replacements if provided
+        if additional_replacements:
+            replacements.update(additional_replacements)
 
         slug = get_slug(repo)
         issue_title = f"[{slug}] {issue_title_suffix}"
@@ -298,24 +302,41 @@ def eol_checks(repo_path, counts, token, repo):
             attr_eol = ", ".join(info.attribute_eol) if isinstance(info.attribute_eol, list) else str(info.attribute_eol)
             print(f"Path: {path}, Index: {info.index}, Working Directory: {info.working_directory}, Attribute: {attr_text} {attr_eol}")
         
-        frm_files_with_lf_in_working_directory = [fname for fname, info in parsed_data.items() if fname.endswith(".frm") and info.working_directory == "lf"]
-        if frm_files_with_lf_in_working_directory:
-            print(f".frm files with LF in working directory:")
-            for file in frm_files_with_lf_in_working_directory:
+        # Check for .frm and .cls files with LF in index that lack proper text/eol attributes
+        problematic_files = []
+        
+        for fname, info in parsed_data.items():
+            if (fname.endswith(".frm") or fname.endswith(".cls")) and info.index == "lf":
+                # Check if file has proper text attribute and eol=crlf
+                attribute_list = info.attribute_text if isinstance(info.attribute_text, list) else [str(info.attribute_text)]
+                has_text_attr = "text" in attribute_list and "-text" not in attribute_list
+                
+                eol_attribute_list = info.attribute_eol if isinstance(info.attribute_eol, list) else [str(info.attribute_eol)]
+                has_crlf_eol = "eol=crlf" in eol_attribute_list
+                
+                # A file needs both text attribute and eol=crlf otherwise the conversion won't happen when downloading the .zip file from Github
+                if not (has_text_attr and has_crlf_eol):
+                    problematic_files.append(fname)
+        
+        if problematic_files:
+            print(f"🔴 Found .frm/.cls files with LF in index without proper text/eol attributes:")
+            for file in problematic_files:
                 print(f" - {file}")
-        else:
-            print(f"No .frm files with LF in working directory found.")
-
-        cls_files_with_lf_in_working_directory = [fname for fname, info in parsed_data.items() if fname.endswith(".cls") and info.working_directory == "lf"]
-        if cls_files_with_lf_in_working_directory:
-            print(f".cls files with LF in working directory:")
-            for file in cls_files_with_lf_in_working_directory:
-                print(f" - {file}")
-        else:
-            print(f"No .cls files with LF in working directory found.")
+            
+            # Format the list of problematic files for the template
+            ls_files_report = "\n".join([f"- `{file}`" for file in problematic_files])
+            additional_replacements = {
+                'ls_files_report': ls_files_report
+            }
+            
+            # Create issue directly
+            # TODO: Uncomment once the issue template is ready
+            # create_issue_wrapper(token, repo, 'has .frm/.cls files with wrong line endings', 'Check F: cls or frm files with LF.md', 'Check F', additional_replacements)
             
     except Exception as e:
         print(f"🔴 Error while parsing git ls-files output: {e}")
+    
+    return  # No return value needed
 
 if __name__ == "__main__":
     main()
