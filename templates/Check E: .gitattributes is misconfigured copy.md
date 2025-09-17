@@ -6,7 +6,12 @@ Currently, the `.gitattributes` file is misconfigured: if people try to download
 
 # How to fix this?
 
+There are mainly 2 options:
+
 ## Option 1: Enforce CRLF in the Index
+
+<details>
+<summary>Details</summary>
 
 ### Step 1: Add this to your `.gitattributes`
 
@@ -34,8 +39,12 @@ git commit -m "Restore line endings"
 
 You could also simply use [Enforce-CRLF](https://github.com/DecimalTurn/Enforce-CRLF) which will make sure to enforce CRLF in your repo for all the current files and will also prevent LF from being introduced by mistake in the future.
 
+</details>
 
 ## Option 2: Convert to CRLF at checkout
+
+<details>
+<summary>Details</summary>
 
 ⚠️ Warning: this approach will solve the line endings issue when people try to clone or download your repo as .zip, but it will not fix line endings if people try to download a single raw file.
 
@@ -50,6 +59,8 @@ To keep LF in the Index and only perform CRLF conversion at checkout, you can us
 *.cls  text eol=crlf
 *.frm  text eol=crlf
 ```
+
+</details>
 
 <hr>
 
