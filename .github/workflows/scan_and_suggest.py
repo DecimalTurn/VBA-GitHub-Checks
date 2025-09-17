@@ -67,19 +67,27 @@ def report_file_extensions_issue(token, repo, counts):
     try:
         if repo['language'] == "Visual Basic .NET" and counts[".vb"] > 0 and counts[".vbproj"] == 0 and counts[".d.vb"] == 0 and counts[".bas"] == 0:       
             # VB.NET extension used for VBA code
-            create_issue_wrapper(token, repo, 'is detected as Visual Basic .NET', 'Check A: Use of vb extension.md', 'Check A')
+            if create_issue_wrapper(token, repo, 'is detected as Visual Basic .NET', 'Check A: Use of vb extension.md', 'Check A'):
+                print("✅ Issue created for Check A - exiting early")
+                return
         
         if repo['language'] == "VBScript" and counts[".vbs"] > 0 and counts[".vba"] == 0 and counts[".bas"] == 0:
             # VBScript extension used for VBA code
-            create_issue_wrapper(token, repo, 'is detected as VBScript', 'Check B: Use of vbs extension.md', 'Check B')
+            if create_issue_wrapper(token, repo, 'is detected as VBScript', 'Check B: Use of vbs extension.md', 'Check B'):
+                print("✅ Issue created for Check B - exiting early")
+                return
 
         if repo['language'] is None and counts['No ext'] > 0:
             # No extension used for VBA code
-            create_issue_wrapper(token, repo, 'is not detected as VBA', 'Check C: Use of no extension.md', 'Check C')
+            if create_issue_wrapper(token, repo, 'is not detected as VBA', 'Check C: Use of no extension.md', 'Check C'):
+                print("✅ Issue created for Check C - exiting early")
+                return
 
         if repo['language'] is None and counts[".txt"] > 0:
             # txt extension used for VBA code
-            create_issue_wrapper(token, repo, 'is not detected as VBA', 'Check D: Use of txt extension.md', 'Check D')
+            if create_issue_wrapper(token, repo, 'is not detected as VBA', 'Check D: Use of txt extension.md', 'Check D'):
+                print("✅ Issue created for Check D - exiting early")
+                return
 
         if repo['language'] is None and any(counts[ext] > 0 for ext in gh.office_vba_extensions) and all(counts[ext] == 0 for ext in gh.code_extensions):
             # create_issue_wrapper(token, repo, 'does not have any source code', 'Check F: Missing source code.md', 'Check F')
@@ -113,30 +121,34 @@ def create_issue_wrapper(token, repo, issue_title_suffix, template_name, label_n
         try:
             if gh.check_recently_closed_issue(token, os.getenv('GITHUB_REPOSITORY'), issue_title, months=3):
                 print(f"🔴 An identical issue was closed recently. Skipping issue creation for: {issue_title}")
-                return
+                return False
         except Exception as e:
             print(f"🔴 Error checking for recently closed issues: {e}")
             print(f"🔴 Skipping issue creation as a safety measure for: {issue_title}")
-            return
+            return False
         
         try:
             issue_body = read_template_file(template_path, replacements)
         except Exception as e:
             print(f"🔴 Error reading the template file: {e}")
-            return
+            return False
 
         try:
             issue_number = gh.create_github_issue(token, os.getenv('GITHUB_REPOSITORY'), issue_title, issue_body, ["external", label_name])
         except Exception as e:
             print(f"🔴 Error creating GitHub issue: {e}")
-            return
+            return False
 
         if issue_number != 0:
             try:
                 new_issue = gh.get_issue(token, os.getenv('GITHUB_REPOSITORY'), issue_number)
                 all_issues_title.append(new_issue['title'])
+                return True
             except Exception as e:
                 print(f"🔴 Error retrieving or appending the issue: {e}")
+                return False
+        
+        return False
 
 def get_slug(repo):
     return repo['owner']['login'] + "/" + repo['name']
@@ -281,7 +293,8 @@ def gitattributes_checks(repo_path, counts, token, repo):
     if gh.gitattributes_misconfigured(repo_path, counts):
         print("🔴 .gitattributes is misconfigured and won't handle line endings conversion properly.")
         print("Creating issue...")
-        create_issue_wrapper(token, repo, 'has a .gitattributes misconfiguration', 'Check E.md', 'Check E')
+        if create_issue_wrapper(token, repo, 'has a .gitattributes misconfiguration', 'Check E.md', 'Check E'):
+            print("✅ Issue created for Check E")
     else:
         print("🟢 .gitattributes is configured correctly.")
 
@@ -332,7 +345,8 @@ def eol_checks(repo_path, counts, token, repo):
                 'ls_files_report': ls_files_report
             }
             
-            create_issue_wrapper(token, repo, 'has .frm/.cls files with wrong line endings', 'Check F.md', 'Check F', additional_replacements)
+            if create_issue_wrapper(token, repo, 'has .frm/.cls files with wrong line endings', 'Check F.md', 'Check F', additional_replacements):
+                print("✅ Issue created for Check F")
 
             # TODO: Create another similar check that will trigger if there are frm/cls files with LF and text unspecified or set and eol is not equal to crlf
             # If text unspecified + eol=/=clrf means that no conversion will happen when downloading the .zip file from Github and on cloning the repos if core.autocrlf is false/unspecified
