@@ -25,7 +25,7 @@ You could also simply use [Enforce-CRLF](https://github.com/DecimalTurn/Enforce-
 
 <hr>
 
-For more information on how to configure your `.gitattributes` file and why you generally don't want to set the `text` property for VBA files, you can have a look at https://github.com/DecimalTurn/VBA-on-GitHub.
+For more information on how to configure your `.gitattributes` file, you can have a look at https://github.com/DecimalTurn/VBA-on-GitHub.
 
 And if you have any questions, feel free to ask it here and a real human will answer you.
 

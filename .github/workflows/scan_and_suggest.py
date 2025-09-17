@@ -281,7 +281,7 @@ def gitattributes_checks(repo_path, counts, token, repo):
     if gh.gitattributes_misconfigured(repo_path, counts):
         print("🔴 .gitattributes is misconfigured and won't handle line endings conversion properly.")
         print("Creating issue...")
-        create_issue_wrapper(token, repo, 'has a .gitattributes misconfiguration', 'Check E: .gitattributes is misconfigured.md', 'Check E')
+        create_issue_wrapper(token, repo, 'has a .gitattributes misconfiguration', 'Check E.md', 'Check E')
     else:
         print("🟢 .gitattributes is configured correctly.")
 
