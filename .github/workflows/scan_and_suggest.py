@@ -318,21 +318,7 @@ def eol_checks(repo_path, counts, token, repo):
 
         # Problematic files for Check F (only)
         # Check for .frm and .cls files with LF and -text
-        problematic_files_check_f = []
-
-        for fname, info in parsed_data.items():
-            if (fname.endswith(".frm") or fname.endswith(".cls")) and info.index == "lf":
-                # Check if file has proper text attribute and eol=crlf
-                attribute_list = info.attribute_text if isinstance(info.attribute_text, list) else [str(info.attribute_text)]
-                has_text_attr_unset = "-text" in attribute_list
-                
-                eol_attribute_list = info.attribute_eol if isinstance(info.attribute_eol, list) else [str(info.attribute_eol)]
-                has_crlf_eol = "eol=crlf" in eol_attribute_list
-                
-                # Check F only applies if text attribute is unset (-text)
-                # If a file has -text set, no conversion will happen during the .zip download and when cloning the repos
-                if has_text_attr_unset:
-                    problematic_files_check_f.append(fname)
+        problematic_files_check_f = gh.get_problematic_files_check_f(parsed_data)
         
         if problematic_files_check_f:
             print(f"🔴 Found .frm/.cls files with LF in index without proper text/eol attributes:")

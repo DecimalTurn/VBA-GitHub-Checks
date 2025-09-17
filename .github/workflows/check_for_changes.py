@@ -322,6 +322,48 @@ def follow_up_check_E(token, repo_info, user, repo_name, issue):
     if comment:
         gh.write_comment(token, main_repo_slug, issue, comment)
 
+def follow_up_check_F(token, repo_info, user, repo_name, issue):
+
+    issue_number = issue['number']
+    main_repo_slug = os.getenv('GITHUB_REPOSITORY')
+    repo_path = utils.repo_path(repo_info['owner']['login'], repo_info['name'])
+
+    counts = get_counts(token, user, repo_name)
+    if not counts:
+        print(f"Failed to get counts for issue: {issue['title']}")
+        return
+
+    comment = ""
+    problematic_files_check_f = [] 
+
+    import git_ls_parser
+    git_ls_output = gh.get_git_ls_files_output(repo_path)
+    parsed_data = git_ls_parser.parse_git_ls_files_output(git_ls_output)
+        
+    # Part specific to Check F
+    try:
+        problematic_files_check_f = gh.get_problematic_files_check_f(parsed_data)
+        if problematic_files_check_f:
+            print("\033[91mProblematic files for Check F:\033[0m")
+            for file in problematic_files_check_f:
+                print(f" - {file}")
+        else:
+            print("No problematic files for Check F found.")
+            comment = "Looks like you made some changes and files now have the correct line endings in the Git Index.\n"
+            comment += "This issue is now resolved, so I'm closing it. If you have any questions, feel free to ask.\n"
+            gh.close_issue(token, main_repo_slug, issue, "completed")
+            handle_labels_after_completion(token, main_repo_slug, issue_number)
+
+    except Exception as e:
+        error_message = (
+            f"Error while checking problematic files for Check F: {e}"
+        )
+        print(error_message)
+    
+    if comment:
+        gh.write_comment(token, main_repo_slug, issue, comment)
+
+
 # This function looks inside the gitattributes file of the repository to check if the they added a rule to 
 # consider the extension as VBA via the linguist-language override
 def check_gitattributes(token, user, repo_name, ext):

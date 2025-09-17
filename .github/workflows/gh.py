@@ -628,3 +628,31 @@ def get_git_ls_files_output(repo_path):
     except Exception as e:
         print(f"🔴 Error while getting git ls-files output: {e}")
         return []
+
+def get_problematic_files_check_f(parsed_data):
+    """
+    Analyze parsed git ls-files output to find problematic .frm and .cls files for Check F.
+    
+    Args:
+        parsed_data: Dictionary with file paths as keys and git ls-files info as values
+        
+    Returns:
+        List of file paths that are problematic for Check F (empty list if none found)
+    """
+    problematic_files_check_f = []
+
+    for fname, info in parsed_data.items():
+        if (fname.endswith(".frm") or fname.endswith(".cls")) and info.index == "lf":
+            # Check if file has proper text attribute and eol=crlf
+            attribute_list = info.attribute_text if isinstance(info.attribute_text, list) else [str(info.attribute_text)]
+            has_text_attr_unset = "-text" in attribute_list
+            
+            eol_attribute_list = info.attribute_eol if isinstance(info.attribute_eol, list) else [str(info.attribute_eol)]
+            has_crlf_eol = "eol=crlf" in eol_attribute_list
+            
+            # Check F only applies if text attribute is unset (-text)
+            # If a file has -text set, no conversion will happen during the .zip download and when cloning the repos
+            if has_text_attr_unset:
+                problematic_files_check_f.append(fname)
+    
+    return problematic_files_check_f
