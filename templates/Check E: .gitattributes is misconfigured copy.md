@@ -2,7 +2,7 @@ Hi @%{user}%,
 
 It seems like there is a small issue with your repo named [%{reponame}%](%{url}%).
 
-Currently, the `.gitattributes` file is misconfigured: if people try to download your repo as a .zip file[^1], they will have a bug if they try to import .cls or .frm files in the Visual Basic Editor (VBE). That's because these downloaded files would have Unix-style line endings (LF) instead of what the VBE expects: Windows-style line endings (CRLF).
+Currently, the `.gitattributes` file is misconfigured: if people try to download your repo as a .zip file[^1], they will have a bug if they try to import `.cls` or `.frm` files in the Visual Basic Editor (VBE). That's because these downloaded files would have Unix-style line endings (LF) instead of what the VBE expects: Windows-style line endings (CRLF).
 
 # How to fix this?
 
@@ -19,6 +19,8 @@ Currently, the `.gitattributes` file is misconfigured: if people try to download
 
 ### Step 2: Restore CRLF line endings in the Git Index.
 
+There are 2 methods you could use to do that:
+
 #### Method A:
 
 If you still have the original files exported from the VBE in your working directory and you are able to use Git from the command line, you can simply run the following 2 commands:
@@ -31,6 +33,7 @@ git commit -m "Restore line endings"
 #### Method B:
 
 You could also simply use [Enforce-CRLF](https://github.com/DecimalTurn/Enforce-CRLF) which will make sure to enforce CRLF in your repo for all the current files and will also prevent LF from being introduced by mistake in the future.
+
 
 ## Option 2: Convert to CRLF at checkout
 

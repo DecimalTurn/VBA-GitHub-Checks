@@ -247,59 +247,14 @@ def main():
 
                 if repo['language'] == "VBA" or repo['language'] == "Visual Basic 6.0":
                     print("")
+                    print(f"Performing checks on VBA/VB6 repo: {repo_path}")
 
-                    print(f"Performing .gitattributes checks")
-                    
-                    print(f"Checking .gitattributes in {repo_path}")
+                    print(f"Checking .gitattributes checks")
+                    gitattributes_checks(repo_path, counts, token, repo)
 
-                    if gh.gitattributes_exists(repo_path):
-                        if gh.gitattributes_misconfigured(repo_path, counts):
-                            print("🔴 .gitattributes is misconfigured and won't handle line endings conversion properly.")
-                            print("Creating issue...")
-                            create_issue_wrapper(token, repo, 'has a .gitattributes misconfiguration', 'Check E: .gitattributes is misconfigured.md', 'Check E')
+                    print(f"Checking EOL in VBA files")
+                    eol_checks(repo_path, counts, token, repo)
 
-
-
-                        else:
-                            print("🟢 .gitattributes is configured correctly.")
-
-                        # Going beyond the .gitattributes checks, we can parse the output of `git ls-files` 
-                        # to check for line endings in actual files as they are in the working directory.
-                        # Note that the EOL in the working directory will depend on the core.autocrlf setting 
-                        # of the git client used to clone the repository. In the case of a unix system, like the 
-                        # GitHub Actions runner, the files will be checked out with core.autocrlf=false and this will immitate the 
-                        # content of the .zip file downloaded from GitHub.
-                        try:
-                            import git_ls_parser
-                            git_ls_output = gh.get_git_ls_files_output(repo_path)
-                            parsed_data = git_ls_parser.parse_git_ls_files_output(git_ls_output)
-                            print("Parsed git ls-files output:")
-                            for path, info in parsed_data.items():
-                                attr_text = ", ".join(info.attribute_text) if isinstance(info.attribute_text, list) else str(info.attribute_text)
-                                attr_eol = ", ".join(info.attribute_eol) if isinstance(info.attribute_eol, list) else str(info.attribute_eol)
-                                print(f"Path: {path}, Index: {info.index}, Working Directory: {info.working_directory}, Attribute: {attr_text} {attr_eol}")
-                            
-                            frm_files_with_lf_in_working_directory = [fname for fname, info in parsed_data.items() if fname.endswith(".frm") and info.working_directory == "lf"]
-                            if frm_files_with_lf_in_working_directory:
-                                print(".frm files with LF in working directory:")
-                                for file in frm_files_with_lf_in_working_directory:
-                                    print(f" - {file}")
-                            else:
-                                print("No .frm files with LF in working directory found.")
-
-                            cls_files_with_lf_in_working_directory = [fname for fname, info in parsed_data.items() if fname.endswith(".cls") and info.working_directory == "lf"]
-                            if cls_files_with_lf_in_working_directory:
-                                print(".cls files with LF in working directory:")
-                                for file in cls_files_with_lf_in_working_directory:
-                                    print(f" - {file}")
-                            else:
-                                print("No .cls files with LF in working directory found.")
-                                
-                        except Exception as e:
-                            print(f"🔴 Error while parsing git ls-files output: {e}")
-
-                    else:
-                        print("🟡 .gitattributes file is missing.")
 
                 if repo['language'] == "Visual Basic .NET" or repo['language'] == "VBScript" or repo['language'] is None:
                     print("")
@@ -312,6 +267,55 @@ def main():
             print("No repositories found.")
 
         time.sleep(2)
+
+def gitattributes_checks(repo_path, counts, token, repo):
+
+    if not gh.gitattributes_exists(repo_path):
+        print("🟡 .gitattributes file is missing.")
+        return
+
+    if gh.gitattributes_misconfigured(repo_path, counts):
+        print("🔴 .gitattributes is misconfigured and won't handle line endings conversion properly.")
+        print("Creating issue...")
+        create_issue_wrapper(token, repo, 'has a .gitattributes misconfiguration', 'Check E: .gitattributes is misconfigured.md', 'Check E')
+    else:
+        print("🟢 .gitattributes is configured correctly.")
+
+def eol_checks(repo_path, counts, token, repo):
+     # Going beyond the .gitattributes checks, we can parse the output of `git ls-files` 
+    # to check for line endings in actual files as they are in the working directory.
+    # Note that the EOL in the working directory will depend on the core.autocrlf setting 
+    # of the git client used to clone the repository. In the case of a unix system, like the 
+    # GitHub Actions runner, the files will be checked out with core.autocrlf=false and this will immitate the 
+    # content of the .zip file downloaded from GitHub.
+    try:
+        import git_ls_parser
+        git_ls_output = gh.get_git_ls_files_output(repo_path)
+        parsed_data = git_ls_parser.parse_git_ls_files_output(git_ls_output)
+        print("Parsed git ls-files output:")
+        for path, info in parsed_data.items():
+            attr_text = ", ".join(info.attribute_text) if isinstance(info.attribute_text, list) else str(info.attribute_text)
+            attr_eol = ", ".join(info.attribute_eol) if isinstance(info.attribute_eol, list) else str(info.attribute_eol)
+            print(f"Path: {path}, Index: {info.index}, Working Directory: {info.working_directory}, Attribute: {attr_text} {attr_eol}")
+        
+        frm_files_with_lf_in_working_directory = [fname for fname, info in parsed_data.items() if fname.endswith(".frm") and info.working_directory == "lf"]
+        if frm_files_with_lf_in_working_directory:
+            print(f".frm files with LF in working directory:")
+            for file in frm_files_with_lf_in_working_directory:
+                print(f" - {file}")
+        else:
+            print(f"No .frm files with LF in working directory found.")
+
+        cls_files_with_lf_in_working_directory = [fname for fname, info in parsed_data.items() if fname.endswith(".cls") and info.working_directory == "lf"]
+        if cls_files_with_lf_in_working_directory:
+            print(f".cls files with LF in working directory:")
+            for file in cls_files_with_lf_in_working_directory:
+                print(f" - {file}")
+        else:
+            print(f"No .cls files with LF in working directory found.")
+            
+    except Exception as e:
+        print(f"🔴 Error while parsing git ls-files output: {e}")
 
 if __name__ == "__main__":
     main()
