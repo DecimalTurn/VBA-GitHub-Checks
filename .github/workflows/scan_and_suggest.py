@@ -329,9 +329,11 @@ def eol_checks(repo_path, counts, token, repo):
                 'ls_files_report': ls_files_report
             }
             
-            # Create issue directly
-            # TODO: Uncomment once the issue template is ready
-            # create_issue_wrapper(token, repo, 'has .frm/.cls files with wrong line endings', 'Check F: cls or frm files with LF.md', 'Check F', additional_replacements)
+            # Create issue directly for Check F.
+            # Note that we only want to create the issue if the repo has a .gitattributes file, otherwise this is a seperate issue caused by autocrlf on Windows
+            # The problem in that case is very similar to Check E since it can be solved by adding a proper .gitattributes file (+renormalizing the files for option 1)
+            if gh.gitattributes_exists(repo_path):
+                create_issue_wrapper(token, repo, 'has .frm/.cls files with wrong line endings', 'Check F: cls or frm files with LF.md', 'Check F', additional_replacements)
             
     except Exception as e:
         print(f"🔴 Error while parsing git ls-files output: {e}")
