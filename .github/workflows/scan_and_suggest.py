@@ -302,38 +302,44 @@ def eol_checks(repo_path, counts, token, repo):
             attr_eol = ", ".join(info.attribute_eol) if isinstance(info.attribute_eol, list) else str(info.attribute_eol)
             print(f"Path: {path}, Index: {info.index}, Working Directory: {info.working_directory}, Attribute: {attr_text} {attr_eol}")
         
-        # Check for .frm and .cls files with LF in index that lack proper text/eol attributes
-        problematic_files = []
-        
+
+        # Problematic files for Check F (only)
+        # Check for .frm and .cls files with LF and -text
+        problematic_files_check_f = []
+
         for fname, info in parsed_data.items():
             if (fname.endswith(".frm") or fname.endswith(".cls")) and info.index == "lf":
                 # Check if file has proper text attribute and eol=crlf
                 attribute_list = info.attribute_text if isinstance(info.attribute_text, list) else [str(info.attribute_text)]
-                has_text_attr = "text" in attribute_list and "-text" not in attribute_list
+                has_text_attr_unset = "-text" in attribute_list
                 
                 eol_attribute_list = info.attribute_eol if isinstance(info.attribute_eol, list) else [str(info.attribute_eol)]
                 has_crlf_eol = "eol=crlf" in eol_attribute_list
                 
-                # A file needs both text attribute and eol=crlf otherwise the conversion won't happen when downloading the .zip file from Github
-                if not (has_text_attr and has_crlf_eol):
-                    problematic_files.append(fname)
+                # Check F only applies if text attribute is unset (-text)
+                # If a file has -text set, no conversion will happen during the .zip download and when cloning the repos
+                if has_text_attr_unset:
+                    problematic_files_check_f.append(fname)
         
-        if problematic_files:
+        if problematic_files_check_f:
             print(f"🔴 Found .frm/.cls files with LF in index without proper text/eol attributes:")
-            for file in problematic_files:
+            for file in problematic_files_check_f:
                 print(f" - {file}")
             
             # Format the list of problematic files for the template
-            ls_files_report = "\n".join([f"- `{file}`" for file in problematic_files])
+            ls_files_report = "\n".join([f"- `{file}`" for file in problematic_files_check_f])
             additional_replacements = {
                 'ls_files_report': ls_files_report
             }
             
-            # Create issue directly for Check F.
-            # Note that we only want to create the issue if the repo has a .gitattributes file, otherwise this is a seperate issue caused by autocrlf on Windows
-            # The problem in that case is very similar to Check E since it can be solved by adding a proper .gitattributes file (+renormalizing the files for option 1)
-            if gh.gitattributes_exists(repo_path):
-                create_issue_wrapper(token, repo, 'has .frm/.cls files with wrong line endings', 'Check F.md', 'Check F', additional_replacements)
+            create_issue_wrapper(token, repo, 'has .frm/.cls files with wrong line endings', 'Check F.md', 'Check F', additional_replacements)
+
+            # TODO: Create another similar check that will trigger if there are frm/cls files with LF and text unspecified or set and eol is not equal to crlf
+            # If text unspecified + eol=/=clrf means that no conversion will happen when downloading the .zip file from Github and on cloning the repos if core.autocrlf is false/unspecified
+            # If text set + eol=/=crlf means that no conversion will happen when downloading the .zip file from Github 
+            # That case is very similar to Check E since it can be solved by adding a proper .gitattributes file (+renormalizing the files for option 1)
+            # The only difference is that this problem can occur for repos without a .gitattributes file at all, so we
+            # need to adjust the wording of the issue template accordingly.
             
     except Exception as e:
         print(f"🔴 Error while parsing git ls-files output: {e}")
