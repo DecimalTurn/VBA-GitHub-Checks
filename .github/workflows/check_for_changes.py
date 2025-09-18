@@ -382,8 +382,8 @@ def check_gitattributes(token, user, repo_name, ext):
 
 def handle_labels_after_completion(token, main_repo_slug, issue_number):
     gh.add_label_to_issue(token, main_repo_slug, issue_number, "completed")
-    gh.remove_label_from_issue(token, main_repo_slug, issue_number, "stale") 
-    gh.remove_label_from_issue(token, main_repo_slug, issue_number, "partially completed") 
+    gh.remove_label_from_issue(token, main_repo_slug, issue_number, "stale", ignore_not_found=True) 
+    gh.remove_label_from_issue(token, main_repo_slug, issue_number, "partially completed", ignore_not_found=True) 
 
 def get_repo_info(token, user, repo_name):
     url = f"https://api.github.com/repos/{user}/{repo_name}"
