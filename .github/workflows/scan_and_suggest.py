@@ -90,13 +90,17 @@ def report_file_extensions_issue(token, repo, counts):
                 return
 
         if repo['language'] is None and any(counts[ext] > 0 for ext in gh.office_vba_extensions) and all(counts[ext] == 0 for ext in gh.code_extensions):
-            # create_issue_wrapper(token, repo, 'does not have any source code', 'Check F: Missing source code.md', 'Check F')
+            # create_issue_wrapper(token, repo, 'does not have any source code', 'Check _: Missing source code.md', 'Check _')
 
             # Since the issue template is not ready, we only want to preserve the list of repos that are in this situation by appending to a list of repo contained in the body of an issue.
             # This means that we have to call the github API and edit the following issue https://github.com/DecimalTurn/VBA-GitHub-Checks/issues/871
             # We simply want to add a the URL of the repo as a new bullet point to the list 
             new_repo = f" 1. {repo['html_url']}\n"
             gh.append_to_issue_body_if_missing(token, main_repo_slug, 871, new_repo)
+            print(f"🔴 Repo {repo['html_url']} contain VBA-Enabled Office documents, but not any source code. Logged in issue #871.")
+            return
+        
+        print("🟢 No issues detected based on file extensions.")
 
     except Exception as e:
         print(f"🔴 An unexpected error occurred: {e}")
@@ -219,7 +223,7 @@ def main():
     
         if page == 1:
             print(f"Found {repos['total_count']} repositories")
-        print('-' * 40)
+        print('=' * 40)
 
         if repos:
             for repo in repos['items']:
@@ -229,6 +233,7 @@ def main():
                 print(f"Language: {repo['language']}")
                 print(f"URL: {repo['html_url']}")
                 print(f"Updated at: {repo['updated_at']}")
+                print("-" * 20)
                 
                 # Check if user is excluded
                 user = repo['owner']['login']
@@ -262,23 +267,24 @@ def main():
                     continue
 
                 if repo['language'] == "VBA" or repo['language'] == "Visual Basic 6.0":
-                    print("")
+                    print('-' * 20)
                     print(f"Performing checks on VBA/VB6 repo: {repo_path}")
-
+                    
+                    print('-' * 20)
                     print(f"Checking .gitattributes checks")
                     gitattributes_checks(repo_path, file_counts, token, repo)
-
+                    
+                    print('-' * 20)
                     print(f"Checking EOL in VBA files")
                     eol_checks(repo_path, file_counts, token, repo)
 
-
                 if repo['language'] == "Visual Basic .NET" or repo['language'] == "VBScript" or repo['language'] is None:
-                    print("")
-                        
+                    print('-' * 20)
                     print(f"Performing file extension checks")
                     report_file_extensions_issue(token, repo, file_counts)
                         
-                print('-' * 40)
+                print('=' * 40)
+
         else:
             print("No repositories found.")
 
