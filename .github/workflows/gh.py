@@ -393,7 +393,8 @@ def count_vba_related_files(repo_path):
 
     # Print the counts
     for ext, count in counts.items():
-        print(f"Number of '{ext}' files: {count}")
+        if count > 0:
+            print(f"Number of '{ext}' files: {count}")
     
     return counts
 

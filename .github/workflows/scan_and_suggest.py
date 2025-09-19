@@ -256,7 +256,7 @@ def main():
 
                 repo_path = utils.repo_path(repo['owner']['login'], repo['name'])
                 try:
-                    counts = gh.count_vba_related_files(repo_path)
+                    file_counts = gh.count_vba_related_files(repo_path)
                 except Exception as e:
                     print(f"::warning file={__file__}::Error counting VBA-related files in {repo_path}: {e}")
                     continue
@@ -266,17 +266,17 @@ def main():
                     print(f"Performing checks on VBA/VB6 repo: {repo_path}")
 
                     print(f"Checking .gitattributes checks")
-                    gitattributes_checks(repo_path, counts, token, repo)
+                    gitattributes_checks(repo_path, file_counts, token, repo)
 
                     print(f"Checking EOL in VBA files")
-                    eol_checks(repo_path, counts, token, repo)
+                    eol_checks(repo_path, file_counts, token, repo)
 
 
                 if repo['language'] == "Visual Basic .NET" or repo['language'] == "VBScript" or repo['language'] is None:
                     print("")
                         
                     print(f"Performing file extension checks")
-                    report_file_extensions_issue(token, repo, counts)
+                    report_file_extensions_issue(token, repo, file_counts)
                         
                 print('-' * 40)
         else:
