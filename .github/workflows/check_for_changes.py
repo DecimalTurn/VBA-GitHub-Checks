@@ -363,6 +363,39 @@ def follow_up_check_F(token, repo_info, user, repo_name, issue):
     if comment:
         gh.write_comment(token, main_repo_slug, issue, comment)
 
+def follow_up_check_G(token, repo_info, user, repo_name, issue):
+
+    issue_number = issue['number']
+    main_repo_slug = os.getenv('GITHUB_REPOSITORY')
+    repo_path = utils.repo_path(repo_info['owner']['login'], repo_info['name'])
+
+    counts = get_counts(token, user, repo_name)
+    if not counts:
+        print(f"Failed to get counts for issue: {issue['title']}")
+        return
+
+    comment = ""
+    problematic_files_check_f = [] 
+
+    import git_ls_parser
+    git_ls_output = gh.get_git_ls_files_output(repo_path)
+    parsed_data = git_ls_parser.parse_git_ls_files_output(git_ls_output)
+        
+    # Part specific to Check G
+    try:
+        if gh.gitattributes_exists(repo_path):
+            # We can use Check E's logic since it's the logic for when the .gitattributes is present, but misconfigured.
+            follow_up_check_E(token, repo_info, user, repo_name, issue)
+
+    except Exception as e:
+        error_message = (
+            f"Error while checking problematic files for Check G: {e}"
+        )
+        print(error_message)
+    
+    if comment:
+        gh.write_comment(token, main_repo_slug, issue, comment)
+
 
 # This function looks inside the gitattributes file of the repository to check if the they added a rule to 
 # consider the extension as VBA via the linguist-language override

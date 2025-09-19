@@ -51,7 +51,7 @@ def load_exclusion_list(exclusion_file_path):
                     exclusion_hashes.add(hash_value.lower())
         print(f"Loaded {len(exclusion_hashes)} exclusion hashes from {exclusion_file_path}")
     except FileNotFoundError:
-        print(f"Warning: Exclusion file {exclusion_file_path} not found. No users will be excluded.")
+        print(f"🔴 Exclusion file {exclusion_file_path} not found. No users will be excluded.")
     except Exception as e:
-        print(f"Error reading exclusion file {exclusion_file_path}: {e}")
+        print(f"🔴 Error reading exclusion file {exclusion_file_path}: {e}")
     return exclusion_hashes

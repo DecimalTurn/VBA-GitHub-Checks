@@ -209,7 +209,7 @@ def main():
     all_open_issues_title = get_open_issues_title(token, os.getenv('GITHUB_REPOSITORY'))
 
     # Load exclusion list
-    exclusion_file_path = './exclusion.txt'
+    exclusion_file_path = './.github/workflows/exclusion.txt'
     exclusion_hashes = utils.load_exclusion_list(exclusion_file_path)
 
     query = 'VBA NOT VBScript'
@@ -223,77 +223,127 @@ def main():
     
         if page == 1:
             print(f"Found {repos['total_count']} repositories")
-        print('=' * 40)
 
         if repos:
             for repo in repos['items']:
-
-                print(f"Name: {repo['name']}")
-                print(f"Description: {repo['description']}")
-                print(f"Language: {repo['language']}")
-                print(f"URL: {repo['html_url']}")
-                print(f"Updated at: {repo['updated_at']}")
-                print("-" * 20)
+                print('=' * 60)
+                analyze_repo(token, repo, exclusion_hashes)
                 
-                # Check if user is excluded
-                user = repo['owner']['login']
-                if is_user_excluded(user, exclusion_hashes):
-                    print(f"🚫 User {user} is excluded (SHA256 hash matches exclusion list)")
-                    print('-' * 40)
-                    continue
-                
-                # Spam prevention - check for open issues only
-                if already_open_issue_for_user(user):
-                    print(f"🟡 Open issue already exists for user: {user}")
-                    print('-' * 40)
-                    continue
-
-                # Clone the repo
-                try:
-                    gh.clone_repo(repo['html_url'])
-                except Exception as e:
-                    print(f"Error cloning the repo: {e}")
-                    return
-                
-                #TODO : 
-                # Store the commit hash of the last commit, the scan_date and the outcome of the scan to be saved in an issue
-                # Save the information at the end in the issue_for_scanned_repo (see gh.py)
-
-                repo_path = utils.repo_path(repo['owner']['login'], repo['name'])
-                try:
-                    file_counts = gh.count_vba_related_files(repo_path)
-                except Exception as e:
-                    print(f"::warning file={__file__}::Error counting VBA-related files in {repo_path}: {e}")
-                    continue
-
-                if repo['language'] == "VBA" or repo['language'] == "Visual Basic 6.0":
-                    print('-' * 20)
-                    print(f"Performing checks on VBA/VB6 repo: {repo_path}")
-                    
-                    print('-' * 20)
-                    print(f"Checking .gitattributes checks")
-                    gitattributes_checks(repo_path, file_counts, token, repo)
-                    
-                    print('-' * 20)
-                    print(f"Checking EOL in VBA files")
-                    eol_checks(repo_path, file_counts, token, repo)
-
-                if repo['language'] == "Visual Basic .NET" or repo['language'] == "VBScript" or repo['language'] is None:
-                    print('-' * 20)
-                    print(f"Performing file extension checks")
-                    report_file_extensions_issue(token, repo, file_counts)
-                        
-                print('=' * 40)
-
         else:
             print("No repositories found.")
 
         time.sleep(2)
 
-def gitattributes_checks(repo_path, counts, token, repo):
+def analyze_repo(token, repo, exclusion_hashes):
+
+    print(f"Name: {repo['name']}")
+    print(f"Author: {repo['owner']['login']}")
+    print(f"Description: {repo['description']}")
+    print(f"Language: {repo['language']}")
+    print(f"URL:↓")
+    print(f"{repo['html_url']}")
+    print(f"Updated at: {repo['updated_at']}")
+    
+    # Check if user is excluded
+    user = repo['owner']['login']
+    if is_user_excluded(user, exclusion_hashes):
+        print(f"🚫 User {user} is excluded (SHA256 hash matches exclusion list)")
+        return
+    
+    # Spam prevention - check for open issues only
+    if already_open_issue_for_user(user):
+        print(f"🟡 Open issue already exists for user: {user}")
+        print('-' * 40)
+        return
+
+    # Clone the repo
+    try:
+        gh.clone_repo(repo['html_url'])
+    except Exception as e:
+        print(f"Error cloning the repo: {e}")
+        return
+    
+    #TODO : 
+    # Store the commit hash of the last commit, the scan_date and the outcome of the scan to be saved in an issue
+    # Save the information at the end in the issue_for_scanned_repo (see gh.py)
+
+    repo_path = utils.repo_path(repo['owner']['login'], repo['name'])
+
+    # Check if the repo is empty
+    if gh.is_repo_empty(repo_path):
+        print(f"🚫 Repository {repo['html_url']} is empty. Skipping further analysis.")
+        return
+
+    try:
+        file_counts = gh.count_vba_related_files(repo_path)
+    except Exception as e:
+        print(f"::warning file={__file__}::Error counting VBA-related files in {repo_path}: {e}")
+        return
+
+    if repo['language'] == "VBA" or repo['language'] == "Visual Basic 6.0":
+        print('-' * 20)
+        print(f"Performing checks on VBA/VB6 repo: {repo_path}")
+        
+        print('-' * 20)
+        print(f"Checking .gitattributes checks")
+        report_gitattributes_issues(repo_path, file_counts, token, repo)
+        
+        print('-' * 20)
+        print(f"Checking EOL in VBA files")
+        report_eol_issues(repo_path, file_counts, token, repo)
+
+    if repo['language'] == "Visual Basic .NET" or repo['language'] == "VBScript" or repo['language'] is None:
+        print('-' * 20)
+        print(f"Performing file extension checks")
+        report_file_extensions_issue(token, repo, file_counts)
+
+def report_missing_gitattributes_issue(repo_path, counts, token, repo):
+    """
+    Check if a .gitattributes file is needed and create Check G issue if appropriate.
+    
+    Args:
+        repo_path: Path to the repository
+        counts: File counts from gh.count_vba_related_files
+        token: GitHub token
+        repo: Repository object
+    """
+    if gh.gitattributes_needed(repo_path, counts):
+        print("Creating issue...")
+        print("🔴 This repo has a problem corresponding to check G")
+        
+        # Get the problematic files for Check G
+        try:
+            import git_ls_parser
+            git_ls_output = gh.get_git_ls_files_output(repo_path)
+            parsed_data = git_ls_parser.parse_git_ls_files_output(git_ls_output)
+            problematic_files_check_g = gh.get_problematic_files_check_g(parsed_data)
+            
+            if problematic_files_check_g:
+                print(f"🔴 Found .frm/.cls files with LF line endings and no .gitattributes file:")
+                for file in problematic_files_check_g:
+                    print(f" - {file}")
+                
+                # Format the list of problematic files for the template
+                ls_files_report = "\n".join([f"- `{file}`" for file in problematic_files_check_g])
+                additional_replacements = {
+                    'ls_files_report': ls_files_report
+                }
+
+                if create_issue_wrapper(token, repo, 'is missing a .gitattributes file', 'Check G.md', 'Check G', additional_replacements):
+                    print("✅ Issue created for Check G")
+
+            else:
+                print("🔴 No problematic files found for Check G")
+        except Exception as e:
+            print(f"🔴 Error while checking problematic files for Check G: {e}")
+    else:
+        print("🟢 .gitattributes file is not needed.")
+
+def report_gitattributes_issues(repo_path, counts, token, repo):
 
     if not gh.gitattributes_exists(repo_path):
         print("🟡 .gitattributes file is missing.")
+        report_missing_gitattributes_issue(repo_path, counts, token, repo)
         return
 
     if gh.gitattributes_misconfigured(repo_path, counts):
@@ -304,13 +354,13 @@ def gitattributes_checks(repo_path, counts, token, repo):
     else:
         print("🟢 .gitattributes is configured correctly.")
 
-def eol_checks(repo_path, counts, token, repo):
-     # Going beyond the .gitattributes checks, we can parse the output of `git ls-files` 
+def report_eol_issues(repo_path, counts, token, repo):
+    # Going beyond the .gitattributes checks, we can parse the output of `git ls-files` 
     # to check for line endings in actual files as they are in the working directory.
     # Note that the EOL in the working directory will depend on the core.autocrlf setting 
-    # of the git client used to clone the repository. In the case of a unix system, like the 
-    # GitHub Actions runner, the files will be checked out with core.autocrlf=false and this will immitate the 
-    # content of the .zip file downloaded from GitHub.
+    # of the git client used to clone the repository. In the case of a Unix system, like the 
+    # GitHub Actions runner on ubuntu, the files will be checked out with core.autocrlf=false and this will immitate the 
+    # content of the .zip file downloaded from GitHub
     try:
         import git_ls_parser
         git_ls_output = gh.get_git_ls_files_output(repo_path)
@@ -340,12 +390,10 @@ def eol_checks(repo_path, counts, token, repo):
             if create_issue_wrapper(token, repo, 'has .frm/.cls files with wrong line endings', 'Check F.md', 'Check F', additional_replacements):
                 print("✅ Issue created for Check F")
 
-            # TODO: Create another similar check that will trigger if there are frm/cls files with LF and text unspecified or set and eol is not equal to crlf
+            # TODO: Create another similar check that will trigger if there are frm/cls files with LF and text unspecified (rare case)
             # If text unspecified + eol=/=clrf means that no conversion will happen when downloading the .zip file from Github and on cloning the repos if core.autocrlf is false/unspecified
-            # If text set + eol=/=crlf means that no conversion will happen when downloading the .zip file from Github 
-            # That case is very similar to Check E since it can be solved by adding a proper .gitattributes file (+renormalizing the files for option 1)
-            # The only difference is that this problem can occur for repos without a .gitattributes file at all, so we
-            # need to adjust the wording of the issue template accordingly.
+            # That case is very similar to Check E since it can be solved by adding a proper lines to the .gitattributes file (+renormalizing the files for option 1)
+            # (Note that if text set + eol=/=crlf means that no conversion will happen when downloading the .zip file from Github [Already taken care of in Check E])
             
     except Exception as e:
         print(f"🔴 Error while parsing git ls-files output: {e}")

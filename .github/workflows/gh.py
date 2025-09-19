@@ -432,7 +432,8 @@ def gitattributes_exists(repo_path):
     # If it exists, return True
     return True
 
-# Check if there is a rule in the .gitattrubutes file that would cause .frm and .cls files to be checked-out as with LF instread of CRLF
+# Check if there is a rule in the .gitattrubutes file that would cause .frm and .cls files to be checked-out with LF instread of CRLF
+# ie. The text attribute is set to auto or set, and the eol attribute is set to lf or unspecified (not CRLF)
 def gitattributes_misconfigured(repo_path, counts):
 
     # If the repo_path is empty, assume the current directory
@@ -531,6 +532,60 @@ def gitattributes_misconfigured(repo_path, counts):
     except Exception as e:
         print(f"🔴 Error while checking .gitattributes: {e}")
         return False
+
+# This functions should be called only if there is no .gitattributes file in the repo 
+# It will look at the output of git ls-files --eol and check if there are any .frm or .cls files LF line endings
+# That would indicate the the author is working on a Windows machine and core.autocrlf is set to true
+# In that case, we suggest to create a .gitattributes file with the correct settings (Check G)
+def gitattributes_needed(repo_path, counts):
+    
+    if gitattributes_exists(repo_path):
+        print("🔴 .gitattributes file found, gitattributes_needed should not be called in that context.")
+        return False
+    
+    import git_ls_parser
+    
+    # If the repo_path is empty, assume the current directory
+    if not repo_path:
+        repo_path = os.getcwd()
+
+    # Get the output of git ls-files --eol
+    ls_files_output = get_git_ls_files_output(repo_path)
+    
+    if not ls_files_output:
+        print("🔴 No output from 'git ls-files --eol'")
+        return False
+
+    # Parse the output to find .frm and .cls files with LF line endings
+    parsed_data = git_ls_parser.parse_git_ls_files_output(ls_files_output)
+    problematic_files = get_problematic_files_check_g(parsed_data)
+
+    if problematic_files:
+        print(f"🔴Problematic files found: {problematic_files}")
+        return True
+    else:
+        print("🟢 No problematic .frm or .cls files found.")
+        return False
+
+def get_problematic_files_check_g(parsed_data):
+    """
+    Analyze parsed git ls-files output to find problematic .frm and .cls files for Check G.
+    This check applies when there's no .gitattributes file and .frm/.cls files have LF line endings
+    in the index, suggesting the author is on Windows with core.autocrlf=true but needs a .gitattributes file.
+    
+    Args:
+        parsed_data: Dictionary with file paths as keys and git ls-files info as values
+        
+    Returns:
+        List of file paths that are problematic for Check G (empty list if none found)
+    """
+    problematic_files_check_g = []
+
+    for fname, info in parsed_data.items():
+        if (fname.endswith(".frm") or fname.endswith(".cls")) and info.index == "lf":
+            problematic_files_check_g.append(fname)
+    
+    return problematic_files_check_g
 
 # This function will receive a list of repos and generate the body for the issue
 # The body of the issue will be a TOML file formatted as a code block
@@ -640,6 +695,7 @@ def get_git_ls_files_output(repo_path):
 def get_problematic_files_check_f(parsed_data):
     """
     Analyze parsed git ls-files output to find problematic .frm and .cls files for Check F.
+    ie. files that have the text attribute unset (-text) and LF line endings.
     
     Args:
         parsed_data: Dictionary with file paths as keys and git ls-files info as values
@@ -664,3 +720,24 @@ def get_problematic_files_check_f(parsed_data):
                 problematic_files_check_f.append(fname)
     
     return problematic_files_check_f
+
+def is_repo_empty(repo_path):
+    # Check if the repo_path is empty
+    if not repo_path:
+        print("🔴 Repo path is empty")
+        raise ValueError("Repo path can't be empty.")
+    
+    # Check if the .git directory exists
+    git_dir = os.path.join(repo_path, '.git')
+    if not os.path.exists(git_dir):
+        print(f"🔴 .git directory does not exist in {repo_path}")
+        raise ValueError(".git directory does not exist.")
+    
+    # Check if there are any files in the repo (excluding .git)
+    for root, dirs, files in os.walk(repo_path):
+        # Remove the '.git' directory from the list of directories to avoid descending into it
+        dirs[:] = [d for d in dirs if d != '.git']
+        if files:
+            return False  # Found files, repo is not empty
+    
+    return True  # No files found, repo is empty

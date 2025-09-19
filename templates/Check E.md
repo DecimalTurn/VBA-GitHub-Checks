@@ -24,7 +24,7 @@ There are mainly 2 options:
 
 ### Step 2: Restore CRLF line endings in the Git Index.
 
-There are 2 methods you could use to do that:
+Here are 2 methods you could use to do that:
 
 #### Method A:
 
