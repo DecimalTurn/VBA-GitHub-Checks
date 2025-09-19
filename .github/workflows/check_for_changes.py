@@ -235,6 +235,9 @@ def follow_up_check_E(token, repo_info, user, repo_name, issue):
         print(f"Failed to get counts for issue: {issue['title']}")
         return
 
+    handle_misconfigured_gitattributes(token, main_repo_slug, issue, issue_number, repo_path, counts)
+
+def handle_misconfigured_gitattributes(token, main_repo_slug, issue, issue_number, repo_path, counts):
     comment = ""
     subCheck = False
     wrong_eol_files = False
@@ -379,17 +382,14 @@ def follow_up_check_G(token, repo_info, user, repo_name, issue):
         return
 
     comment = ""
-    problematic_files_check_f = [] 
-
-    import git_ls_parser
-    git_ls_output = gh.get_git_ls_files_output(repo_path)
-    parsed_data = git_ls_parser.parse_git_ls_files_output(git_ls_output)
         
     # Part specific to Check G
     try:
         if gh.gitattributes_exists(repo_path):
             # We can use Check E's logic since it's the logic for when the .gitattributes is present, but misconfigured.
-            follow_up_check_E(token, repo_info, user, repo_name, issue)
+            handle_misconfigured_gitattributes(token, main_repo_slug, issue, issue_number, repo_path, counts)
+        else:
+            print("No .gitattributes file found, nothing to do for Check G.")
 
     except Exception as e:
         error_message = (

@@ -354,7 +354,7 @@ def clone_repo(repo_url):
             raise ValueError(f"Git clone failed with exit code {result.returncode}")
         return True
     else:
-        print(f"Repository {repo_slug} already exists in {utils.subfolder_name}.")
+        print(f"Repository {repo_slug} already exists in {utils.subfolder_name()}.")
         raise ValueError("Problem with cloning.")
     
 def count_vba_related_files(repo_path):
