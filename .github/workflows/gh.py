@@ -348,7 +348,10 @@ def clone_repo(repo_url):
     
     if not os.path.exists(repo_path):
         print(f"Cloning {repo_url} into {repo_path}")
-        subprocess.run(["git", "clone", "--depth", "1", repo_url, repo_path])
+        result = subprocess.run(["git", "clone", "--depth", "1", "--quiet", repo_url, repo_path])
+        if result.returncode != 0:
+            print(f"🔴 Failed to clone repository {repo_url}. Exit code: {result.returncode}")
+            raise ValueError(f"Git clone failed with exit code {result.returncode}")
         return True
     else:
         print(f"Repository {repo_slug} already exists in {utils.subfolder_name}.")
