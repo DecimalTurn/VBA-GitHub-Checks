@@ -567,6 +567,29 @@ def gitattributes_needed(repo_path, counts):
         print("🟢 No problematic .frm or .cls files found.")
         return False
 
+def cls_file_excluded(file_path):
+    """
+    Check if a .cls file should be excluded from checks.
+    
+    Args:
+        file_path: The full file path to check
+        
+    Returns:
+        True if the file should be excluded (ThisWorkbook.cls or Sheet\d.cls pattern), False otherwise
+    """
+    # Extract just the filename from the path
+    filename = os.path.basename(file_path)
+    
+    # Skip ThisWorkbook.cls
+    if filename == "ThisWorkbook.cls":
+        return True
+        
+    # Skip files matching Sheet\d.cls pattern (e.g., Sheet1.cls, Sheet2.cls)
+    if re.match(r'^Sheet\d+\.cls$', filename):
+        return True
+        
+    return False
+
 def get_problematic_files_check_g(parsed_data):
     """
     Analyze parsed git ls-files output to find problematic .frm and .cls files for Check G.
@@ -583,23 +606,31 @@ def get_problematic_files_check_g(parsed_data):
 
     for fname, info in parsed_data.items():
         if (fname.endswith(".frm") or fname.endswith(".cls")) and info.index == "lf":
+
+            # Skip excluded .cls files (ThisWorkbook.cls and Sheet\d.cls)
+            if fname.endswith(".cls") and cls_file_excluded(fname):
+                continue
+
             problematic_files_check_g.append(fname)
     
     return problematic_files_check_g
 
-# This function will receive a list of repos and generate the body for the issue
-# The body of the issue will be a TOML file formatted as a code block
-# The format will be:
-# ```toml
-# [repo_slug]
-# repo_name = "repo_name"
-# repo_url = "repo_url"
-# repo_owner = "repo_owner"
-# commit_id = "latest_commit"
-# scan_date = "analysis_date"
-# outcome = "outcome"
-# ```
+
+
 def generate_body_for_issue_for_scanned_repo(previous, new_repos):
+    """
+    This function will receive a list of repos and generate the body for the issue
+    The body of the issue will be a TOML file formatted as a code block
+    The format will be:
+    ```toml
+    [repo_slug]
+    repo_name = "repo_name"
+    repo_url = "repo_url"
+    repo_owner = "repo_owner"
+    commit_id = "latest_commit"
+    scan_date = "analysis_date"
+    outcome = "outcome"
+    """
 
     # parse the previous issue body
     # and create a dictionary with the repo_slug as the key
@@ -707,6 +738,11 @@ def get_problematic_files_check_f(parsed_data):
 
     for fname, info in parsed_data.items():
         if (fname.endswith(".frm") or fname.endswith(".cls")) and info.index == "lf":
+            
+            # Skip excluded .cls files (ThisWorkbook.cls and Sheet\d.cls)
+            if fname.endswith(".cls") and cls_file_excluded(fname):
+                continue
+            
             # Check if file has proper text attribute and eol=crlf
             attribute_list = info.attribute_text if isinstance(info.attribute_text, list) else [str(info.attribute_text)]
             has_text_attr_unset = "-text" in attribute_list
