@@ -10,7 +10,7 @@ import utils
 all_issues_title = None
 all_open_issues_title = None
 
-def already_issue_for_user(user):   
+def already_issue_for_user(user):
     # Iterate through all issues and check if the user matches
     for existing_issue in all_issues_title:
         # Extract the user from the existing issue title
@@ -19,7 +19,7 @@ def already_issue_for_user(user):
             return True
     return False
 
-def already_open_issue_for_user(user):   
+def already_open_issue_for_user(user):
     # Iterate through all open issues and check if the user matches
     for existing_issue in all_open_issues_title:
         # Extract the user from the existing issue title

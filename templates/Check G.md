@@ -2,7 +2,7 @@ Hi @%{user}%,
 
 It seems like there is a small issue with your repo named [%{reponame}%](%{url}%).
 
-Currently, if people try to download your repo as a .zip file (or if they try to clone your repos without specific git settings), they will have a bug if they try to import `.cls` or `.frm` files in the Visual Basic Editor (VBE). That's because these downloaded files would have Unix-style line endings (LF) instead of what the VBE expects: Windows-style line endings (CRLF).
+Currently, if people try to download your repo as a .zip file (or if they try to clone your repos without specific git settings), they will have a bug if they try to import `.cls` or `.frm` files in the Visual Basic Editor (VBE). That's because these downloaded files would have Unix-style line endings (LF) instead of what the VBE expects: Windows-style line endings (CRLF):
 
 %{ls_files_report}%
 
