@@ -587,6 +587,10 @@ def cls_file_excluded(file_path):
     # Skip files matching Sheet\d.cls pattern (e.g., Sheet1.cls, Sheet2.cls)
     if re.match(r'^Sheet\d+\.cls$', filename):
         return True
+
+    # Skip ThisDocument.cls (Word document)
+    if filename == "ThisDocument.cls":
+        return True
         
     return False
 
