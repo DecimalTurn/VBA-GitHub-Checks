@@ -6,7 +6,7 @@ Currently, if people try to download your repo as a .zip file (or if they try to
 
 %{ls_files_report}%
 
-The issue is that your repository doesn't have a `.gitattributes` file to tell other machines how to handle  end-of-line (EOL) characters. In this case, GitHub servers are likely Unix sytsems and they don't perform EOL conversion by default. Note that this would also affect Windows systems that clone your repo without automatic conversion turned on (`core.autocrlf=true`).
+The issue is that your repository doesn't have a `.gitattributes` file to tell other machines how to handle  end-of-line (EOL) characters. When generating the .zip file, since GitHub servers are Unix systems, they don't perform EOL conversion by default. Furthermore, this would even affect Windows users if they try to clone your repo and they don't have automatic conversion turned on (`core.autocrlf=true`) on their machine.
 
 # How to fix this?
 
