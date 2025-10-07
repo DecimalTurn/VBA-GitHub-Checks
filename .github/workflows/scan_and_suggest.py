@@ -280,9 +280,9 @@ def analyze_repo(token, repo, exclusion_hashes):
         print(f"::warning file={__file__}::Error counting VBA-related files in {repo_path}: {e}")
         return
 
-    if repo['language'] == "VBA" or repo['language'] == "Visual Basic 6.0":
+    if repo['language'] == "VBA":
         print('-' * 20)
-        print(f"Performing checks on VBA/VB6 repo: {repo_path}")
+        print(f"Performing checks on VBA repo: {repo_path}")
         
         print('-' * 20)
         print(f"Checking .gitattributes checks")
