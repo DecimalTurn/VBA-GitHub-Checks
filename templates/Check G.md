@@ -10,7 +10,7 @@ The issue is that your repository doesn't have a `.gitattributes` file to tell o
 
 # How to fix this?
 
-You need to create a `.gitattributes` file in the root of your repository to handle VBA file line endings properly. There are mainly 2 options:
+You can create a `.gitattributes` file in the root of your repository to handle VBA file line endings properly. There are mainly 2 options:
 
 ## Option 1: Enforce CRLF in the Index (Recommended)
 
