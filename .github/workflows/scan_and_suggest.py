@@ -243,6 +243,7 @@ def analyze_repo(token, repo, exclusion_hashes):
     print(f"URL:↓")
     print(f"{repo['html_url']}")
     print(f"Updated at: {repo['updated_at']}")
+    print(f"Stars: {repo.get('stargazers_count', 0)}")
     
     # Check if user is excluded
     user = repo['owner']['login']
