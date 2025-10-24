@@ -10,6 +10,9 @@ import utils
 all_issues_title = None
 all_open_issues_title = None
 
+# Number of stars threshold to start analyzing VBA repos for issues with .gitattributes and EOL
+start_threshold_vba_repo = 1
+
 def already_issue_for_user(user):
     # Iterate through all issues and check if the user matches
     for existing_issue in all_issues_title:
@@ -243,7 +246,7 @@ def analyze_repo(token, repo, exclusion_hashes):
     print(f"URL:↓")
     print(f"{repo['html_url']}")
     print(f"Updated at: {repo['updated_at']}")
-    print(f"Stars: {repo.get('stargazers_count', 0)}")
+    print(f"Stars: {repo['stargazers_count']}")
     
     # Check if user is excluded
     user = repo['owner']['login']
@@ -281,7 +284,7 @@ def analyze_repo(token, repo, exclusion_hashes):
         print(f"::warning file={__file__}::Error counting VBA-related files in {repo_path}: {e}")
         return
 
-    if repo['language'] == "VBA":
+    if repo['language'] == "VBA" and repo['stargazers_count'] > start_threshold_vba_repo:
         print('-' * 20)
         print(f"Performing checks on VBA repo: {repo_path}")
         
