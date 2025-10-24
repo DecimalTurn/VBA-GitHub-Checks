@@ -50,7 +50,7 @@ def search_github_repos(query, sort='updated', order='desc', per_page=60, page=1
         return None
 
 def read_template_file(template_path, replacements):
-    with open(template_path, 'r') as file:
+    with open(template_path, 'r', encoding='utf-8') as file:
         template_content = file.read()
     print("Replace merge fields")
     # Replace merge fields in the template
@@ -325,7 +325,7 @@ def report_missing_gitattributes_issue(repo_path, counts, token, repo):
                     print(f" - {file}")
                 
                 # Format the list of problematic files for the template
-                ls_files_report = "\n".join([f"- `{file}`" for file in problematic_files_check_g])
+                ls_files_report = "\n".join([f"- `{format_filename_for_markdown(file)}`" for file in problematic_files_check_g])
                 additional_replacements = {
                     'ls_files_report': ls_files_report
                 }
@@ -383,7 +383,7 @@ def report_eol_issues(repo_path, counts, token, repo):
                 print(f" - {file}")
             
             # Format the list of problematic files for the template
-            ls_files_report = "\n".join([f"- `{file}`" for file in problematic_files_check_f])
+            ls_files_report = "\n".join([f"- `{format_filename_for_markdown(file)}`" for file in problematic_files_check_f])
             additional_replacements = {
                 'ls_files_report': ls_files_report
             }

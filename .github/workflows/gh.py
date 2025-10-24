@@ -137,7 +137,8 @@ def create_github_issue(token, this_repo_slug, title, body, labels=None):
     url = f"https://api.github.com/repos/{this_repo_slug}/issues"
     headers = {
         'Accept': 'application/vnd.github.v3+json',
-        'Authorization': f'token {token}'
+        'Authorization': f'token {token}',
+        'Content-Type': 'application/json; charset=utf-8'
     }
     data = {
         'title': title,
