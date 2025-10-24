@@ -284,7 +284,7 @@ def analyze_repo(token, repo, exclusion_hashes):
         print(f"::warning file={__file__}::Error counting VBA-related files in {repo_path}: {e}")
         return
 
-    if repo['language'] == "VBA" and repo['stargazers_count'] > start_threshold_vba_repo:
+    if repo['language'] == "VBA" and repo['stargazers_count'] >= start_threshold_vba_repo:
         print('-' * 20)
         print(f"Performing checks on VBA repo: {repo_path}")
         
@@ -406,4 +406,5 @@ def report_eol_issues(repo_path, counts, token, repo):
 
 if __name__ == "__main__":
     main()
+
 
