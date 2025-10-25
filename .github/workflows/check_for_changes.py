@@ -318,6 +318,7 @@ def handle_misconfigured_gitattributes(token, main_repo_slug, issue, issue_numbe
                     "```\n"
                     "\n"
                     "<h3>Option B:</h3>\n"
+                    "\n"
                     "You could also simply use [Enforce-CRLF](https://github.com/DecimalTurn/Enforce-CRLF) which will make sure to enforce CRLF in your repo for all the current files and will also prevent LF from being introduced by mistake in the future.\n"
                     "\n"
                     "For more information on how to configure your .gitattributes file and why you don't want to set the `text` property for VBA files, you can have a look at https://github.com/DecimalTurn/VBA-on-GitHub.\n"
@@ -481,4 +482,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
