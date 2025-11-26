@@ -14,6 +14,76 @@ import utils
 
 all_open_issues = None
 
+def detect_repository_rename(original_user, original_repo_name, repo_info):
+    """
+    Detect if a repository was renamed by comparing original name with current repo info.
+    
+    Args:
+        original_user: Username from the issue title
+        original_repo_name: Repository name from the issue title
+        repo_info: Current repository information from GitHub API
+    
+    Returns:
+        dict with 'renamed' boolean and 'current_name' if renamed, None if not renamed
+    """
+    if repo_info and repo_info.get('status_code') == 200:
+        current_name = repo_info.get('name')
+        current_user = repo_info.get('owner', {}).get('login')
+        
+        # Check if repository name changed (user should be the same)
+        if current_user == original_user and current_name != original_repo_name:
+            print(f"🟡 Repository was renamed from '{original_user}/{original_repo_name}' to '{current_user}/{current_name}'")
+            return {
+                'renamed': True,
+                'current_name': current_name,
+                'current_user': current_user,
+                'original_name': original_repo_name
+            }
+    
+    return {'renamed': False}
+
+def update_issue_for_renamed_repo(token, repo_slug, issue, rename_info):
+    """
+    Update issue title and add a comment about the repository rename.
+    
+    Args:
+        token: GitHub token
+        repo_slug: Repository slug for the issues repo
+        issue: Issue object
+        rename_info: Dictionary containing rename information
+    """
+    try:
+        old_title = issue['title']
+        # Replace the old repo name in the title with the new one
+        new_title = old_title.replace(
+            f"[{rename_info['current_user']}/{rename_info['original_name']}]",
+            f"[{rename_info['current_user']}/{rename_info['current_name']}]"
+        )
+        
+        # Update the issue title
+        url = f"https://api.github.com/repos/{repo_slug}/issues/{issue['number']}"
+        headers = {
+            'Accept': 'application/vnd.github.v3+json',
+            'Authorization': f'token {token}'
+        }
+        data = {'title': new_title}
+        response = requests.patch(url, headers=headers, json=data)
+        
+        if response.status_code == 200:
+            print(f"✅ Updated issue title from '{old_title}' to '{new_title}'")
+            
+            # Add a comment about the rename
+            comment = (
+                f"I noticed that this repository was renamed from `{rename_info['original_name']}` "
+                f"to `{rename_info['current_name']}`. I've updated this issue title to reflect the new name."
+            )
+            gh.write_comment(token, repo_slug, issue, comment)
+        else:
+            print(f"🔴 Failed to update issue title. Status code: {response.status_code}")
+            
+    except Exception as e:
+        print(f"🔴 Error updating issue for renamed repo: {e}")
+
 def follow_up_issues(token, repo_slug):
     global all_open_issues
     
@@ -43,6 +113,16 @@ def follow_up_issues(token, repo_slug):
             gh.write_comment(token, repo_slug, issue, "Looks like the repository has been deleted or privated. Closing the issue.")
             gh.add_label_to_issue(token, os.getenv('GITHUB_REPOSITORY'), issue['number'], "repo deleted")
             continue
+        
+        # Check if the repository was renamed
+        rename_info = detect_repository_rename(user, repo_name, repo_info)
+        if rename_info['renamed']:
+            update_issue_for_renamed_repo(token, repo_slug, issue, rename_info)
+            # Update the issue object with the new title for subsequent processing
+            issue['title'] = issue['title'].replace(
+                f"[{user}/{repo_name}]",
+                f"[{user}/{rename_info['current_name']}]"
+            )
         
         if check == "A":
             follow_up_check_A(token, repo_info, user, repo_name, issue)
@@ -228,7 +308,8 @@ def follow_up_check_E(token, repo_info, user, repo_name, issue):
 
     issue_number = issue['number']
     main_repo_slug = os.getenv('GITHUB_REPOSITORY')
-    repo_path = utils.repo_path(repo_info['owner']['login'], repo_info['name'])
+    # Use the original repository name from the issue for the path since that's where it was cloned
+    repo_path = utils.repo_path(user, repo_name)
 
     counts = get_counts(token, user, repo_name)
     if not counts:
@@ -334,7 +415,8 @@ def follow_up_check_F(token, repo_info, user, repo_name, issue):
 
     issue_number = issue['number']
     main_repo_slug = os.getenv('GITHUB_REPOSITORY')
-    repo_path = utils.repo_path(repo_info['owner']['login'], repo_info['name'])
+    # Use the original repository name from the issue for the path since that's where it was cloned
+    repo_path = utils.repo_path(user, repo_name)
 
     counts = get_counts(token, user, repo_name)
     if not counts:
@@ -375,7 +457,8 @@ def follow_up_check_G(token, repo_info, user, repo_name, issue):
 
     issue_number = issue['number']
     main_repo_slug = os.getenv('GITHUB_REPOSITORY')
-    repo_path = utils.repo_path(repo_info['owner']['login'], repo_info['name'])
+    # Use the original repository name from the issue for the path since that's where it was cloned
+    repo_path = utils.repo_path(user, repo_name)
 
     counts = get_counts(token, user, repo_name)
     if not counts:
