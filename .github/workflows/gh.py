@@ -446,8 +446,8 @@ def gitattributes_misconfigured(repo_path, counts):
     
     if not os.path.exists(git_attributes_path):
         # throw an error if the file does not exist
-        print("🔴 .gitattributes file does not exist")
-        raise ValueError("Problem while checking .gitattributes file.")
+        print(f"🔴 .gitattributes file does not exist at {git_attributes_path}")
+        return False
     
     # Print the output of git ls-files --eol for .frm and .cls files
     try:
