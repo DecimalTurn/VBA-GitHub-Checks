@@ -204,6 +204,19 @@ def is_user_excluded(username, exclusion_hashes):
     user_hash = get_username_sha256(username)
     return user_hash in exclusion_hashes
 
+def format_filename_for_markdown(filename):
+    """
+    Format a filename for use in Markdown by escaping special characters.
+    
+    Args:
+        filename: The filename to format
+        
+    Returns:
+        The filename with special characters escaped for Markdown
+    """
+    # Escape backticks and other special Markdown characters
+    return filename.replace('`', '\\`').replace('_', '\\_')
+
 def main():
 
     global all_issues_title, all_open_issues_title
