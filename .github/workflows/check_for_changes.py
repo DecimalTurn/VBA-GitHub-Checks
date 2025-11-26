@@ -44,7 +44,7 @@ def detect_repository_rename(original_user, original_repo_name, repo_info):
 
 def update_issue_for_renamed_repo(token, repo_slug, issue, rename_info):
     """
-    Update issue title and add a comment about the repository rename.
+    Update issue title and body to reflect the repository rename, and add a comment about the update.
     
     Args:
         token: GitHub token
@@ -54,32 +54,40 @@ def update_issue_for_renamed_repo(token, repo_slug, issue, rename_info):
     """
     try:
         old_title = issue['title']
+        old_body = issue['body']
+        
         # Replace the old repo name in the title with the new one
         new_title = old_title.replace(
             f"[{rename_info['current_user']}/{rename_info['original_name']}]",
             f"[{rename_info['current_user']}/{rename_info['current_name']}]"
         )
         
-        # Update the issue title
+        # Replace the old repo name in the body with the new one (only inside square brackets)
+        new_body = old_body.replace(
+            f"[{rename_info['original_name']}]",
+            f"[{rename_info['current_name']}]"
+        )
+        
+        # Update the issue title and body
         url = f"https://api.github.com/repos/{repo_slug}/issues/{issue['number']}"
         headers = {
             'Accept': 'application/vnd.github.v3+json',
             'Authorization': f'token {token}'
         }
-        data = {'title': new_title}
+        data = {'title': new_title, 'body': new_body}
         response = requests.patch(url, headers=headers, json=data)
         
         if response.status_code == 200:
-            print(f"✅ Updated issue title from '{old_title}' to '{new_title}'")
+            print(f"✅ Updated issue title and body for renamed repo: '{rename_info['original_name']}' -> '{rename_info['current_name']}'")
             
             # Add a comment about the rename
             comment = (
                 f"I noticed that this repository was renamed from `{rename_info['original_name']}` "
-                f"to `{rename_info['current_name']}`. I've updated this issue title to reflect the new name."
+                f"to `{rename_info['current_name']}`. I've updated this issue to reflect the new name."
             )
             gh.write_comment(token, repo_slug, issue, comment)
         else:
-            print(f"🔴 Failed to update issue title. Status code: {response.status_code}")
+            print(f"🔴 Failed to update issue. Status code: {response.status_code}")
             
     except Exception as e:
         print(f"🔴 Error updating issue for renamed repo: {e}")
