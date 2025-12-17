@@ -204,6 +204,19 @@ def is_user_excluded(username, exclusion_hashes):
     user_hash = get_username_sha256(username)
     return user_hash in exclusion_hashes
 
+def has_xvba_modules_folder(repo_path):
+    """
+    Check if the repository has an xvba_modules folder in the root directory.
+    
+    Args:
+        repo_path: Path to the repository
+        
+    Returns:
+        True if xvba_modules folder exists in root directory, False otherwise
+    """
+    xvba_modules_path = os.path.join(repo_path, 'xvba_modules')
+    return os.path.isdir(xvba_modules_path)
+
 def format_filename_for_markdown(filename):
     """
     Format a filename for use in Markdown by escaping special characters.
@@ -251,6 +264,7 @@ def main():
         time.sleep(2)
 
 def analyze_repo(token, repo, exclusion_hashes):
+    main_repo_slug = os.getenv('GITHUB_REPOSITORY')
 
     print(f"Name: {repo['name']}")
     print(f"Author: {repo['owner']['login']}")
@@ -295,6 +309,14 @@ def analyze_repo(token, repo, exclusion_hashes):
         file_counts = gh.count_vba_related_files(repo_path)
     except Exception as e:
         print(f"::warning file={__file__}::Error counting VBA-related files in {repo_path}: {e}")
+        return
+
+    # Check for xvba_modules folder and log to issue #1108 if found
+    if has_xvba_modules_folder(repo_path):
+        # Log to issue #1108 for repos with xvba_modules folder
+        new_repo = f" 1. {repo['html_url']}\n"
+        gh.append_to_issue_body_if_missing(token, main_repo_slug, 1108, new_repo)
+        print(f"☑️ Repo {repo['html_url']} contains an xvba_modules folder. Logged in issue #1108.")
         return
 
     if repo['language'] == "VBA" and repo['stargazers_count'] >= start_threshold_vba_repo:
