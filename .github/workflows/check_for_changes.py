@@ -80,12 +80,13 @@ def update_issue_for_renamed_repo(token, repo_slug, issue, rename_info):
         if response.status_code == 200:
             print(f"✅ Updated issue title and body for renamed repo: '{rename_info['original_name']}' -> '{rename_info['current_name']}'")
             
-            # Add a comment about the rename
-            comment = (
-                f"I noticed that this repository was renamed from `{rename_info['original_name']}` "
-                f"to `{rename_info['current_name']}`. I've updated this issue to reflect the new name."
-            )
-            gh.write_comment(token, repo_slug, issue, comment)
+            # Uncomment the following section to add a comment about the rename
+            # comment = (
+            #     f"I noticed that this repository was renamed from `{rename_info['original_name']}` "
+            #     f"to `{rename_info['current_name']}`. I've updated this issue to reflect the new name."
+            # )
+            # gh.write_comment(token, repo_slug, issue, comment)
+            
         else:
             print(f"🔴 Failed to update issue. Status code: {response.status_code}")
             
