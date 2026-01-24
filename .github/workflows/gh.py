@@ -595,6 +595,39 @@ def cls_file_excluded(file_path):
         
     return False
 
+def has_double_lf_header(file_path):
+    """
+    Check if a .cls or .frm file has double LF in the file header.
+    
+    As discussed in issue #1169, if a .cls/.frm file uses double LF after the first line
+    (e.g., VERSION 1.0 CLASS), the import will succeed without any issue in VBA.
+    
+    Args:
+        file_path: The full file path to check
+        
+    Returns:
+        True if the file has double LF in the header (after VERSION line), False otherwise
+    """
+    try:
+        # Read the file in binary mode to detect actual line endings
+        with open(file_path, 'rb') as f:
+            content = f.read(200)  # Read first 200 bytes, enough for header detection
+        
+        # Check for double LF after VERSION line
+        # The pattern we're looking for is: VERSION ... LF LF
+        if content.startswith(b'VERSION '):
+            # Find the first LF after VERSION
+            first_lf = content.find(b'\n')
+            if first_lf != -1 and first_lf + 1 < len(content):
+                # Check if the next character is also LF (double LF)
+                if content[first_lf + 1:first_lf + 2] == b'\n':
+                    return True
+        
+        return False
+    except Exception as e:
+        print(f"Warning: Could not check for double LF header in {file_path}: {e}")
+        return False
+
 def get_problematic_files_check_g(parsed_data):
     """
     Analyze parsed git ls-files output to find problematic .frm and .cls files for Check G.
@@ -614,6 +647,10 @@ def get_problematic_files_check_g(parsed_data):
 
             # Skip excluded .cls files (ThisWorkbook.cls and Sheet\d.cls)
             if fname.endswith(".cls") and cls_file_excluded(fname):
+                continue
+
+            # Skip files with double LF in header (valid format per issue #1169)
+            if has_double_lf_header(fname):
                 continue
 
             problematic_files_check_g.append(fname)
@@ -746,6 +783,10 @@ def get_problematic_files_check_f(parsed_data):
             
             # Skip excluded .cls files (ThisWorkbook.cls and Sheet\d.cls)
             if fname.endswith(".cls") and cls_file_excluded(fname):
+                continue
+            
+            # Skip files with double LF in header (valid format per issue #1169)
+            if has_double_lf_header(fname):
                 continue
             
             # Check if file has proper text attribute and eol=crlf
