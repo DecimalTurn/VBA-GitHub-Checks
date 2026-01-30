@@ -401,6 +401,8 @@ def handle_misconfigured_gitattributes(token, main_repo_slug, issue, issue_numbe
                     f"However, there are still {number_of_wrong_eol_files} .frm/.cls files with LF line endings. "
                     "You need to renormalize these files. [SubCheck EA]\n"
                     "\n"
+                    "<h3>Option A:</h3>\n"
+                    "\n"
                     "If you still have the original files exported from the VBE in your working directory and you are able to use Git from the command line, you can simply run the following 2 commands:\n"
                     "```bash\n"
                     "git add . --renormalize\n"
