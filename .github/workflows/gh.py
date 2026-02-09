@@ -199,7 +199,9 @@ def append_to_issue_body_if_missing(token, repo_slug, issue_number, content):
         append_to_issue_body(token, repo_slug, issue_number, content)
 
 def append_to_issue_body(token, repo_slug, issue_number, content):
-    new_body = get_issue_body(token, repo_slug, issue_number) + content
+    current_body = get_issue_body(token, repo_slug, issue_number)
+    print(f"ℹ️ Issue #{issue_number} body size before append: {len(current_body)}/65536 characters")
+    new_body = current_body + content
     update_issue(token, repo_slug, issue_number, new_body)
 
 def get_issue_body(token, repo_slug, issue_number):
