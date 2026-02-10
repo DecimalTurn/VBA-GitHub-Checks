@@ -3,12 +3,7 @@
 import os
 import sys
 import tempfile
-import types
 import unittest
-
-# Ensure requests import in gh.py is satisfied without installing the package.
-if "requests" not in sys.modules:
-    sys.modules["requests"] = types.SimpleNamespace()
 
 # Make sure we can import gh from the workflows directory.
 ROOT_DIR = os.path.dirname(os.path.dirname(__file__))
