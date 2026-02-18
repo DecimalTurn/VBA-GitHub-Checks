@@ -11,7 +11,7 @@ all_issues_title = None
 all_open_issues_title = None
 
 # Number of stars threshold to start analyzing VBA repos for issues with .gitattributes and EOL
-start_threshold_vba_repo = 1
+stars_threshold_vba_repo = 2
 
 def already_issue_for_user(user):
     # Iterate through all issues and check if the user matches
@@ -319,7 +319,7 @@ def analyze_repo(token, repo, exclusion_hashes):
         print(f"☑️ Repo {repo['html_url']} contains an xvba_modules folder. Logged in issue #1108.")
         return
 
-    if repo['language'] == "VBA" and repo['stargazers_count'] >= start_threshold_vba_repo:
+    if repo['language'] == "VBA" and repo['stargazers_count'] >= stars_threshold_vba_repo:
         print('-' * 20)
         print(f"Performing checks on VBA repo: {repo_path}")
         
