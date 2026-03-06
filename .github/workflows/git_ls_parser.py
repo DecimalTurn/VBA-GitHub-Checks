@@ -35,7 +35,7 @@ def parse_git_ls_files_output(lines):
         # Unescape quoted paths
         if path.startswith('"') and path.endswith('"'):
             # Remove quotes and decode unicode escapes
-            path = bytes(path[1:-1], 'utf-8').decode('unicode_escape')
+            path = path[1:-1].encode('raw_unicode_escape').decode('utf-8')
         result[path] = GitEolInfo(index=index, working_directory=working_dir, attribute_text=attribute_text, attribute_eol=attribute_eol)
 
     return result
