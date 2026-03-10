@@ -355,7 +355,7 @@ def report_missing_gitattributes_issue(repo_path, counts, token, repo):
             import git_ls_parser
             git_ls_output = gh.get_git_ls_files_output(repo_path)
             parsed_data = git_ls_parser.parse_git_ls_files_output(git_ls_output)
-            problematic_files_check_g = gh.get_problematic_files_check_g(parsed_data)
+            problematic_files_check_g = gh.get_problematic_files_check_g(parsed_data, repo_path)
             
             if problematic_files_check_g:
                 print(f"🔴 Found .frm/.cls files with LF line endings and no .gitattributes file:")

@@ -561,7 +561,7 @@ def gitattributes_needed(repo_path, counts):
 
     # Parse the output to find .frm and .cls files with LF line endings
     parsed_data = git_ls_parser.parse_git_ls_files_output(ls_files_output)
-    problematic_files = get_problematic_files_check_g(parsed_data)
+    problematic_files = get_problematic_files_check_g(parsed_data, repo_path)
 
     if problematic_files:
         print(f"🔴Problematic files found: {problematic_files}")
@@ -578,7 +578,7 @@ def cls_file_excluded(file_path):
         file_path: The full file path to check
         
     Returns:
-        True if the file should be excluded (ThisWorkbook.cls or Sheet\d.cls pattern), False otherwise
+        True if the file should be excluded (ThisWorkbook.cls or Sheet\\d.cls pattern), False otherwise
     """
     # Extract just the filename from the path
     filename = os.path.basename(file_path)
@@ -630,7 +630,26 @@ def has_double_lf_header(file_path):
         print(f"Warning: Could not check for double LF header in {file_path}: {e}")
         return False
 
-def get_problematic_files_check_g(parsed_data):
+def has_vba_class_header(file_path):
+    """
+    Check if a .cls file starts with a VBA class module header.
+
+    Args:
+        file_path: The full file path to check
+
+    Returns:
+        True if the file matches /^\\s*VERSION \\d.\\d CLASS/, False otherwise
+    """
+    try:
+        with open(file_path, 'rb') as f:
+            content = f.read(200)
+
+        return re.match(rb'^\s*VERSION \d\.\d CLASS', content) is not None
+    except Exception as e:
+        print(f"Warning: Could not check for VBA class header in {file_path}: {e}")
+        return False
+
+def get_problematic_files_check_g(parsed_data, repo_path=None):
     """
     Analyze parsed git ls-files output to find problematic .frm and .cls files for Check G.
     This check applies when there's no .gitattributes file and .frm/.cls files have LF line endings
@@ -638,6 +657,7 @@ def get_problematic_files_check_g(parsed_data):
     
     Args:
         parsed_data: Dictionary with file paths as keys and git ls-files info as values
+        repo_path: Optional repository root used to resolve files for header checks
         
     Returns:
         List of file paths that are problematic for Check G (empty list if none found)
@@ -646,13 +666,18 @@ def get_problematic_files_check_g(parsed_data):
 
     for fname, info in parsed_data.items():
         if (fname.endswith(".frm") or fname.endswith(".cls")) and info.index == "lf":
+            full_path = os.path.join(repo_path, fname) if repo_path else fname
 
             # Skip excluded .cls files (ThisWorkbook.cls and Sheet\d.cls)
             if fname.endswith(".cls") and cls_file_excluded(fname):
                 continue
 
+            # Skip .cls files that are not exported VBA class modules (adding a .gitattributes won't be enough to make them be imported as class modules in the VBE).
+            if fname.endswith(".cls") and not has_vba_class_header(full_path):
+                continue
+
             # Skip files with double LF in header (valid format per issue #1169)
-            if has_double_lf_header(fname):
+            if has_double_lf_header(full_path):
                 continue
 
             problematic_files_check_g.append(fname)
