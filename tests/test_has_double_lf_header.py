@@ -3,6 +3,7 @@
 import os
 import sys
 import tempfile
+import types
 import unittest
 
 # Make sure we can import gh from the workflows directory.
@@ -10,6 +11,9 @@ ROOT_DIR = os.path.dirname(os.path.dirname(__file__))
 WORKFLOWS_DIR = os.path.join(ROOT_DIR, ".github", "workflows")
 if WORKFLOWS_DIR not in sys.path:
     sys.path.insert(0, WORKFLOWS_DIR)
+
+if "requests" not in sys.modules:
+    sys.modules["requests"] = types.SimpleNamespace()
 
 import gh  # noqa: E402
 

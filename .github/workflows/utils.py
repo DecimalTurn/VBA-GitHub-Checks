@@ -1,6 +1,14 @@
 import os
 
 SUBFOLDERNAME = 'repos'
+office_vba_extensions = ['.docm', '.dotm', '.xlsm', '.xltm', '.xlsb', '.xlam', '.pptm', '.ppam', '.potm']
+code_extensions = ['.bas', '.cls', '.frm', '.vba', '.vbs', '.vb', '.d.vb', '.txt', 'No ext']
+config_extensions = ['.vbproj']
+
+
+def has_vba_enabled_office_files(counts):
+    """Return True when a repository contains at least one VBA-enabled Office file."""
+    return any(counts.get(ext, 0) > 0 for ext in office_vba_extensions)
 
 def subfolder_name():
     return SUBFOLDERNAME

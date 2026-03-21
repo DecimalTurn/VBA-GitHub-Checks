@@ -6,12 +6,6 @@ import re
 import utils
 import datetime
 
-office_vba_extensions = ['.docm', '.dotm', '.xlsm', '.xltm', '.xlsb', '.xlam', '.pptm', '.ppam', 'potm']
-code_extensions = ['.bas', '.cls', '.frm', '.vba', '.vbs', '.vb', '.d.vb', '.txt', 'No ext']
-config_extensions = ['.vbproj']
-
-# how to call office_vba_extensions from another file?
-
 def get_all_issues_title(token, repo_slug):
     url = f"https://api.github.com/repos/{repo_slug}/issues"
     headers = {
@@ -363,9 +357,9 @@ def clone_repo(repo_url):
 def count_vba_related_files(repo_path):
 
     vba_extensions = []
-    vba_extensions.extend(code_extensions)
-    vba_extensions.extend(config_extensions)
-    vba_extensions.extend(office_vba_extensions)
+    vba_extensions.extend(utils.code_extensions)
+    vba_extensions.extend(utils.config_extensions)
+    vba_extensions.extend(utils.office_vba_extensions)
     
     counts = {ext: 0 for ext in vba_extensions}
     
@@ -385,7 +379,7 @@ def count_vba_related_files(repo_path):
                     if file.endswith(ext) and is_vba_file(file_path):
                         counts[ext] += 1
                     continue
-                if ext in office_vba_extensions:
+                if ext in utils.office_vba_extensions:
                     if file.endswith(ext) and utils.is_binary_file(file_path):
                         counts[ext] += 1
                     continue

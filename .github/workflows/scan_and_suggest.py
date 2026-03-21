@@ -92,7 +92,7 @@ def report_file_extensions_issue(token, repo, counts):
                 print("✅ Issue created for Check D - exiting early")
                 return
 
-        if repo['language'] is None and any(counts[ext] > 0 for ext in gh.office_vba_extensions) and all(counts[ext] == 0 for ext in gh.code_extensions):
+        if repo['language'] is None and any(counts[ext] > 0 for ext in utils.office_vba_extensions) and all(counts[ext] == 0 for ext in utils.code_extensions):
             # create_issue_wrapper(token, repo, 'does not have any source code', 'Check _: Missing source code.md', 'Check _')
 
             # Since the issue template is not ready, we only want to preserve the list of repos that are in this situation by appending to a list of repo contained in the body of an issue.
@@ -346,6 +346,10 @@ def report_missing_gitattributes_issue(repo_path, counts, token, repo):
         token: GitHub token
         repo: Repository object
     """
+    if utils.has_vba_enabled_office_files(counts):
+        print("🟡 VBA-enabled Office files detected (.xlsm/.xlam/.docm/etc.). Skipping Check G issue creation.")
+        return
+
     if gh.gitattributes_needed(repo_path, counts):
         print("Creating issue...")
         print("🔴 This repo has a problem corresponding to check G")
