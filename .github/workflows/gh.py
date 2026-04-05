@@ -76,42 +76,26 @@ def get_all_issues(token, repo_slug, state='all'):
     
     return all_issues_title
 
-def check_recently_closed_issue(token, repo_slug, issue_title, months=3):
-    """Check if there's a closed issue with the same title that was closed less than the specified months ago"""
-    import datetime
-    from datetime import timezone
-    
+def has_closed_issue_with_exact_title(token, repo_slug, issue_title):
+    """Check if there is already a closed issue with exactly the same title."""
     try:
-        # Get all closed issues
         closed_issues = get_all_issues(token, repo_slug, state='closed')
-        
-        # Calculate the cutoff date (3 months ago by default)
-        cutoff_date = datetime.datetime.now(timezone.utc) - datetime.timedelta(days=30 * months)
-        
+
         for issue in closed_issues:
-            # Check if the title matches exactly
             if issue.get('title') == issue_title:
-                # Parse the closed_at date
                 closed_at_str = issue.get('closed_at')
+                issue_number = issue.get('number')
                 if closed_at_str:
-                    try:
-                        # Parse the ISO 8601 date string
-                        closed_at = datetime.datetime.fromisoformat(closed_at_str.replace('Z', '+00:00'))
-                        
-                        # Check if it was closed recently
-                        if closed_at > cutoff_date:
-                            days_ago = (datetime.datetime.now(timezone.utc) - closed_at).days
-                            print(f"🔴 Found recently closed issue '{issue_title}' (closed {days_ago} days ago)")
-                            return True
-                    except ValueError as e:
-                        print(f"Warning: Could not parse closed_at date for issue {issue.get('number')}: {e}")
-                        continue
-        
+                    print(f"🔴 Found closed issue '{issue_title}' (issue #{issue_number}, closed at {closed_at_str})")
+                else:
+                    print(f"🔴 Found closed issue '{issue_title}' (issue #{issue_number})")
+                return True
+
         return False
-        
+
     except Exception as e:
-        print(f"🔴 Error checking for recently closed issues: {e}")
-        raise Exception(f"Failed to check for recently closed issues: {e}")  # Throw to stop issue creation and move to next repo
+        print(f"🔴 Error checking for matching closed issues: {e}")
+        raise Exception(f"Failed to check for matching closed issues: {e}")  # Throw to stop issue creation and move to next repo
 
 def get_issue(token, repo_slug , issue_number):
     url = f"https://api.github.com/repos/{repo_slug}/issues/{issue_number}"
