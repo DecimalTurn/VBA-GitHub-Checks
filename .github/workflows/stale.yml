@@ -25,6 +25,7 @@ jobs:
         days-before-close: 30
         stale-issue-label: 'stale'
         only-labels: 'external'
+        exempt-issue-labels: 'list'
         close-issue-message: 'Closing this issue due to prolonged inactivity.'
         remove-stale-when-updated: true
         close-issue-reason: 'not_planned'
