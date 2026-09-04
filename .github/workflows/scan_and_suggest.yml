@@ -2,8 +2,8 @@ name: VBA-Scan-And-Suggest
 
 on:
   workflow_dispatch:
-  schedule:
-  - cron:  '30 12 * * *'
+  #schedule:
+  #- cron:  '30 12 * * *'
 
 permissions:
   issues: write  # Ensure the token has permission to create issues
